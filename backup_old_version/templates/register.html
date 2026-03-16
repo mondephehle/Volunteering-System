@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Register for Event - Student Volunteering Platform{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">Register for Volunteer Event</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('register') }}">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        {{ form.student_name.label(class="form-label") }}
+                        {{ form.student_name(class="form-control", placeholder="Enter your full name") }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.event_id.label(class="form-label") }}
+                        {{ form.event_id(class="form-select") }}
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        {{ form.submit(class="btn btn-success") }}
+                        <a href="{{ url_for('events') }}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

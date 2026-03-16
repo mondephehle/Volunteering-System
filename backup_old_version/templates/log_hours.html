@@ -1,0 +1,46 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Log Volunteer Hours - Student Volunteering Platform{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0">Log Your Volunteer Hours</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('log_hours') }}">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        {{ form.student_name.label(class="form-label") }}
+                        {{ form.student_name(class="form-control", placeholder="Your name") }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.event_id.label(class="form-label") }}
+                        {{ form.event_id(class="form-select") }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.hours.label(class="form-label") }}
+                        {{ form.hours(class="form-control", placeholder="Hours worked") }}
+                        <small class="text-muted">Enter in 0.5 increments (e.g., 2.5)</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.description.label(class="form-label") }}
+                        {{ form.description(class="form-control", rows=3, placeholder="What work did you do?") }}
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        {{ form.submit(class="btn btn-info text-white") }}
+                        <a href="{{ url_for('hours_list') }}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

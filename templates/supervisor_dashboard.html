@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="mb-4">Supervisor Dashboard</h2>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">Assigned Events</div>
+            <div class="card-body">
+                {% if events %}
+                    <ul class="list-group">
+                        {% for event in events %}
+                            <li class="list-group-item">
+                                <strong>{{ event.title }}</strong><br>
+                                {{ event.location }}<br>
+                                {{ event.date.strftime('%d %b %Y %H:%M') if event.date else 'N/A' }}<br><br>
+                                <a href="{{ url_for('send_event_alert', event_id=event.id) }}" class="btn btn-sm btn-warning">Send Alert</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No assigned events.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">Pending Volunteer Logs</div>
+            <div class="card-body">
+                {% if pending_logs %}
+                    <ul class="list-group">
+                        {% for log in pending_logs %}
+                            <li class="list-group-item">
+                                <strong>{{ log.student.full_name }}</strong><br>
+                                Event: {{ log.event.title }}<br>
+                                Hours: {{ log.hours }}<br>
+                                Description: {{ log.description or 'No description' }}<br>
+                                Submitted: {{ log.submission_date.strftime('%d %b %Y %H:%M') }}<br><br>
+                                <a href="{{ url_for('review_hour_log', log_id=log.id) }}" class="btn btn-sm btn-primary">Review</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No pending logs.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">Reviewed Logs</div>
+            <div class="card-body">
+                {% if reviewed_logs %}
+                    <ul class="list-group">
+                        {% for log in reviewed_logs %}
+                            <li class="list-group-item">
+                                <strong>{{ log.student.full_name }}</strong><br>
+                                Event: {{ log.event.title }}<br>
+                                Hours: {{ log.hours }}<br>
+                                Status:
+                                <span class="badge bg-{% if log.status == 'approved' %}success{% else %}danger{% endif %}">
+                                    {{ log.status }}
+                                </span><br>
+                                Comment: {{ log.supervisor_comment or 'No comment' }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No reviewed logs yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

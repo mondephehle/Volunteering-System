@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4">
+                <h2 class="mb-4">Add Event</h2>
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">{{ form.title.label(class='form-label') }} {{ form.title(class='form-control') }}</div>
+                    <div class="mb-3">{{ form.description.label(class='form-label') }} {{ form.description(class='form-control', rows='4') }}</div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">{{ form.date.label(class='form-label') }} {{ form.date(class='form-control') }}</div>
+                        <div class="col-md-6 mb-3">{{ form.time.label(class='form-label') }} {{ form.time(class='form-control') }}</div>
+                    </div>
+                    <div class="mb-3">{{ form.location.label(class='form-label') }} {{ form.location(class='form-control') }}</div>
+                    <div class="mb-3">{{ form.supervisor_name.label(class='form-label') }} {{ form.supervisor_name(class='form-control') }}</div>
+                    <div class="mb-3">{{ form.max_participants.label(class='form-label') }} {{ form.max_participants(class='form-control') }}</div>
+                    {{ form.submit(class='btn btn-success') }}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

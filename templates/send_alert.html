@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h2 class="mb-4">Send Alert</h2>
+
+        <div class="card mb-3">
+            <div class="card-body">
+                <p><strong>Event:</strong> {{ event.title }}</p>
+                <p><strong>Location:</strong> {{ event.location }}</p>
+                <p><strong>Date:</strong> {{ event.date.strftime('%d %b %Y %H:%M') if event.date else 'N/A' }}</p>
+                <p><strong>Supervisor:</strong> {{ event.supervisor.full_name if event.supervisor else 'Not assigned' }}</p>
+            </div>
+        </div>
+
+        <form method="POST">
+            {{ form.hidden_tag() }}
+
+            <div class="mb-3">
+                {{ form.title.label(class="form-label") }}
+                {{ form.title(class="form-control") }}
+            </div>
+
+            <div class="mb-3">
+                {{ form.message.label(class="form-label") }}
+                {{ form.message(class="form-control", rows="5") }}
+            </div>
+
+            {{ form.submit(class="btn btn-warning") }}
+            <a href="{{ url_for('supervisor_dashboard') }}" class="btn btn-secondary">Back</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

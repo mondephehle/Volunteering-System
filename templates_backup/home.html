@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="p-5 bg-white rounded-4 shadow-sm text-center">
+    <h1 class="display-6 fw-bold">Student Volunteering & Community Service Platform</h1>
+    <p class="lead mt-3">Students can create accounts, browse events, register for opportunities, and log their hours for the events they joined.</p>
+    <div class="d-flex justify-content-center gap-3 mt-4 flex-wrap">
+        <a href="{{ url_for('student_register') }}" class="btn btn-success btn-lg">Create Student Account</a>
+        <a href="{{ url_for('student_login') }}" class="btn btn-outline-success btn-lg">Student Login</a>
+        <a href="{{ url_for('events') }}" class="btn btn-outline-secondary btn-lg">View Public Events</a>
+    </div>
+</div>
+{% endblock %}

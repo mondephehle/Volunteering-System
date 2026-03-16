@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h2 class="mb-4">Review Volunteer Hours</h2>
+
+        <div class="card mb-3">
+            <div class="card-body">
+                <p><strong>Student:</strong> {{ log.student.full_name }}</p>
+                <p><strong>Event:</strong> {{ log.event.title }}</p>
+                <p><strong>Hours Submitted:</strong> {{ log.hours }}</p>
+                <p><strong>Description:</strong> {{ log.description or 'No description' }}</p>
+            </div>
+        </div>
+
+        <form method="POST">
+            {{ form.hidden_tag() }}
+
+            <div class="mb-3">
+                {{ form.status.label(class="form-label") }}
+                {{ form.status(class="form-select") }}
+            </div>
+
+            <div class="mb-3">
+                {{ form.supervisor_comment.label(class="form-label") }}
+                {{ form.supervisor_comment(class="form-control", rows="4") }}
+            </div>
+
+            {{ form.submit(class="btn btn-success") }}
+            <a href="{{ url_for('supervisor_dashboard') }}" class="btn btn-secondary">Back</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

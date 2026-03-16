@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="mb-4">Available Events</h2>
+
+<div class="row">
+    {% for event in events %}
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5>{{ event.title }}</h5>
+                    <p>{{ event.description }}</p>
+                    <p><strong>Location:</strong> {{ event.location }}</p>
+                    <p><strong>Date:</strong> {{ event.date.strftime('%d %b %Y %H:%M') if event.date else 'N/A' }}</p>
+                    <p><strong>Supervisor:</strong> {{ event.supervisor.full_name if event.supervisor else 'Not assigned' }}</p>
+
+                    {% if event.id in registered_event_ids %}
+                        <button class="btn btn-secondary btn-sm" disabled>Already Registered</button>
+                    {% else %}
+                        <form method="POST" action="{{ url_for('register_for_event', event_id=event.id) }}">
+                            <button type="submit" class="btn btn-primary btn-sm">Register for Event</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

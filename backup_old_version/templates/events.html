@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Volunteer Events - Student Volunteering Platform{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Volunteer Opportunities</h1>
+    <a href="{{ url_for('add_event') }}" class="btn btn-primary">+ Add New Event</a>
+</div>
+
+{% if events %}
+    <div class="row">
+        {% for event in events %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 shadow">
+                <div class="card-body">
+                    <h5 class="card-title">{{ event.title }}</h5>
+                    <p class="card-text text-muted">{{ event.description or 'No description available' }}</p>
+                    
+                    <ul class="list-unstyled mb-3 small">
+                        <li><strong>📍 Location:</strong> {{ event.location or 'TBD' }}</li>
+                        <li><strong>📅 Date:</strong> {{ event.date.strftime('%B %d, %Y at %I:%M %p') if event.date else 'TBD' }}</li>
+                        <li><strong>👥 Max Participants:</strong> {{ event.max_participants }}</li>
+                    </ul>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('register') }}" class="btn btn-primary btn-sm">Register</a>
+                        
+                        <form action="{{ url_for('delete_event', id=event.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this event?');">
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        <h4>No events available</h4>
+        <p>Be the first to <a href="{{ url_for('add_event') }}">create an event</a>!</p>
+    </div>
+{% endif %}
+{% endblock %}

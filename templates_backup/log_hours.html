@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4">
+                <h2 class="mb-1">Log Hours</h2>
+                <p class="text-muted">Event: {{ event.title }} | Supervisor: {{ event.supervisor_name or 'TBA' }}</p>
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">{{ form.hours.label(class='form-label') }} {{ form.hours(class='form-control') }}</div>
+                    <div class="mb-3">{{ form.description.label(class='form-label') }} {{ form.description(class='form-control', rows='4') }}</div>
+                    {{ form.submit(class='btn btn-success') }}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
