@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, flash, session
+from flask import Flask, render_template, redirect, url_for, flash, session, request
 from functools import wraps
 from datetime import datetime
 
@@ -306,24 +306,40 @@ def create_app():
         form = EventForm()
 
         if form.validate_on_submit():
-            event_datetime = datetime.combine(form.date.data, form.time.data)
-            supervisor = User.query.filter_by(role='supervisor').first()
+            # Handle image upload
+            image_filename = None
+            file = request.files.get('image')
+            if file and file.filename:
+                allowed = {'png', 'jpg', 'jpeg', 'webp'}
+                ext = file.filename.rsplit('.', 1)[-1].lower()
+                if ext in allowed:
+                    from werkzeug.utils import secure_filename
+                    import os
+                    filename = secure_filename(file.filename)
+                    unique_name = f"{int(datetime.utcnow().timestamp())}_{filename}"
+                    save_path = os.path.join(app.root_path, 'static', 'uploads', 'events', unique_name)
+                    os.makedirs(os.path.dirname(save_path), exist_ok=True)
+                    file.save(save_path)
+                    image_filename = unique_name
+
+            # Combine date and time into one datetime
+            event_date = datetime.combine(form.date.data, form.time.data)
 
             event = Event(
                 title=form.title.data,
                 description=form.description.data,
-                date=event_datetime,
+                date=event_date,
                 location=form.location.data,
-                max_participants=form.max_participants.data or 0,
+                max_participants=form.max_participants.data,
                 category=form.category.data,
                 status=form.status.data,
-                supervisor_id=supervisor.id if supervisor else None
+                image_filename=image_filename
             )
 
             db.session.add(event)
             db.session.commit()
 
-            flash('Event created successfully.', 'success')
+            flash('Event created successfully!', 'success')
             return redirect(url_for('admin_dashboard'))
 
         return render_template('admin_create_event.html', form=form)

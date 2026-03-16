@@ -37,6 +37,7 @@ class Event(db.Model):
     category = db.Column(db.String(100), nullable=True)
     status = db.Column(db.String(20), default='open')  # open / closed / archived
     supervisor_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    image_filename = db.Column(db.String(200))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     registrations = db.relationship('Registration', backref='event', lazy=True, cascade='all, delete-orphan')

@@ -1,4 +1,5 @@
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileAllowed
 from wtforms import StringField, TextAreaField, FloatField, PasswordField, SelectField, SubmitField, IntegerField, DateField, TimeField
 from wtforms.validators import DataRequired, Length, NumberRange, Optional, Email, EqualTo
 
@@ -51,6 +52,7 @@ class EventForm(FlaskForm):
     time = TimeField('Event Time', validators=[DataRequired()])
     location = StringField('Location', validators=[Optional(), Length(max=200)])
     max_participants = IntegerField('Maximum Participants', validators=[Optional(), NumberRange(min=1, max=1000)])
+    image = FileField('Event Image', validators=[FileAllowed(['jpg', 'jpeg', 'png', 'webp'], 'Images only')])
     category = StringField('Category', validators=[Optional(), Length(max=100)])
     status = SelectField(
         'Status',
