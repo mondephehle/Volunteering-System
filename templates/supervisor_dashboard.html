@@ -1,77 +1,376 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2 class="mb-4">Supervisor Dashboard</h2>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
 
-<div class="row">
-    <div class="col-md-4">
-        <div class="card mb-4">
-            <div class="card-header">Assigned Events</div>
-            <div class="card-body">
-                {% if events %}
-                    <ul class="list-group">
-                        {% for event in events %}
-                            <li class="list-group-item">
-                                <strong>{{ event.title }}</strong><br>
-                                {{ event.location }}<br>
-                                {{ event.date.strftime('%d %b %Y %H:%M') if event.date else 'N/A' }}<br><br>
-                                <a href="{{ url_for('send_event_alert', event_id=event.id) }}" class="btn btn-sm btn-warning">Send Alert</a>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p>No assigned events.</p>
-                {% endif %}
-            </div>
-        </div>
-    </div>
+  :root {
+    --red:        #CC0000;
+    --red-soft:   #fff0f0;
+    --red-mid:    #ffd5d5;
+    --ink:        #1a1a2e;
+    --ink-mid:    #3d3d5c;
+    --ink-light:  #7b7b9a;
+    --bg:         #f7f7fb;
+    --surface:    #ffffff;
+    --border:     #e8e8f0;
+    --green:      #1a7a4a;
+    --green-soft: #edf7f2;
+    --amber:      #b45309;
+    --amber-soft: #fef3e2;
+    --blue:       #1565c0;
+    --blue-soft:  #e8f0fc;
+    --shadow-sm:  0 1px 4px rgba(26,26,46,.06);
+    --shadow-md:  0 4px 20px rgba(26,26,46,.09);
+    --radius:     14px;
+    --radius-sm:  8px;
+  }
 
-    <div class="col-md-8">
-        <div class="card mb-4">
-            <div class="card-header">Pending Volunteer Logs</div>
-            <div class="card-body">
-                {% if pending_logs %}
-                    <ul class="list-group">
-                        {% for log in pending_logs %}
-                            <li class="list-group-item">
-                                <strong>{{ log.student.full_name }}</strong><br>
-                                Event: {{ log.event.title }}<br>
-                                Hours: {{ log.hours }}<br>
-                                Description: {{ log.description or 'No description' }}<br>
-                                Submitted: {{ log.submission_date.strftime('%d %b %Y %H:%M') }}<br><br>
-                                <a href="{{ url_for('review_hour_log', log_id=log.id) }}" class="btn btn-sm btn-primary">Review</a>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p>No pending logs.</p>
-                {% endif %}
-            </div>
-        </div>
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--ink); }
 
-        <div class="card">
-            <div class="card-header">Reviewed Logs</div>
-            <div class="card-body">
-                {% if reviewed_logs %}
-                    <ul class="list-group">
-                        {% for log in reviewed_logs %}
-                            <li class="list-group-item">
-                                <strong>{{ log.student.full_name }}</strong><br>
-                                Event: {{ log.event.title }}<br>
-                                Hours: {{ log.hours }}<br>
-                                Status:
-                                <span class="badge bg-{% if log.status == 'approved' %}success{% else %}danger{% endif %}">
-                                    {{ log.status }}
-                                </span><br>
-                                Comment: {{ log.supervisor_comment or 'No comment' }}
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p>No reviewed logs yet.</p>
-                {% endif %}
-            </div>
-        </div>
-    </div>
+  /* ── PAGE HEADER ─────────────────────────── */
+  .page-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 28px; animation: fadeUp .3s ease both;
+  }
+  .page-title { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--ink); }
+  .page-sub   { font-size: 13px; color: var(--ink-light); margin-top: 4px; }
+
+  /* ── STAT CARDS ──────────────────────────── */
+  .stats-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 16px; margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 22px;
+    display: flex; flex-direction: column; gap: 12px;
+    box-shadow: var(--shadow-sm); transition: box-shadow .2s, transform .2s;
+    animation: fadeUp .4s ease both;
+  }
+  .stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+  .stat-card:nth-child(1) { animation-delay: .05s; }
+  .stat-card:nth-child(2) { animation-delay: .10s; }
+  .stat-card:nth-child(3) { animation-delay: .15s; }
+  .stat-top  { display: flex; align-items: flex-start; justify-content: space-between; }
+  .stat-icon { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 19px; }
+  .si-red    { background: var(--red-soft); }
+  .si-green  { background: var(--green-soft); }
+  .si-amber  { background: var(--amber-soft); }
+  .si-blue   { background: var(--blue-soft); }
+  .stat-value { font-family: 'DM Serif Display', serif; font-size: 34px; color: var(--ink); line-height: 1; }
+  .stat-label { font-size: 12.5px; color: var(--ink-light); }
+
+  /* ── LAYOUT ──────────────────────────────── */
+  .dash-grid { display: grid; grid-template-columns: 360px 1fr; gap: 22px; }
+
+  /* ── PANEL ───────────────────────────────── */
+  .panel {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow-sm);
+    overflow: hidden; margin-bottom: 22px;
+    animation: fadeUp .4s ease both; animation-delay: .2s;
+  }
+  .panel-header {
+    padding: 18px 22px 14px; display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+  .panel-title { font-family: 'DM Serif Display', serif; font-size: 16px; color: var(--ink); }
+  .panel-sub   { font-size: 12px; color: var(--ink-light); margin-top: 2px; }
+  .panel-badge {
+    font-size: 11px; font-weight: 600; padding: 3px 9px;
+    border-radius: 20px; background: var(--red); color: white;
+  }
+
+  /* ── EVENT ITEM ──────────────────────────── */
+  .event-item {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 16px 22px; border-bottom: 1px solid var(--border);
+    transition: background .15s;
+  }
+  .event-item:last-child { border-bottom: none; }
+  .event-item:hover { background: var(--bg); }
+  .event-date-box {
+    width: 46px; height: 50px; flex-shrink: 0;
+    background: var(--red-soft); border: 1px solid var(--red-mid);
+    border-radius: 10px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  .event-date-day { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--red); line-height: 1; }
+  .event-date-mon { font-size: 9px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--red); }
+  .event-info  { flex: 1; min-width: 0; }
+  .event-name  { font-size: 13.5px; font-weight: 500; color: var(--ink); margin-bottom: 4px; }
+  .event-meta  { font-size: 12px; color: var(--ink-light); line-height: 1.7; }
+
+  /* ── LOG ITEM ────────────────────────────── */
+  .log-item {
+    padding: 16px 22px; border-bottom: 1px solid var(--border);
+    transition: background .15s;
+  }
+  .log-item:last-child { border-bottom: none; }
+  .log-item:hover { background: var(--bg); }
+
+  .log-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+  .log-student { display: flex; align-items: center; gap: 10px; }
+  .log-avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600; color: white; flex-shrink: 0;
+  }
+  .av-1 { background: linear-gradient(135deg,#667eea,#764ba2); }
+  .av-2 { background: linear-gradient(135deg,#f093fb,#f5576c); }
+  .av-3 { background: linear-gradient(135deg,#4facfe,#00f2fe); }
+  .av-4 { background: linear-gradient(135deg,#43e97b,#38f9d7); }
+  .av-5 { background: linear-gradient(135deg,#fa709a,#fee140); }
+  .log-student-name  { font-size: 13.5px; font-weight: 500; color: var(--ink); }
+  .log-student-event { font-size: 12px; color: var(--ink-light); }
+
+  .log-hours-badge {
+    background: var(--blue-soft); color: var(--blue);
+    font-size: 12px; font-weight: 600; padding: 4px 10px;
+    border-radius: 20px; white-space: nowrap; flex-shrink: 0;
+  }
+
+  .log-meta { font-size: 12px; color: var(--ink-light); margin-bottom: 10px; line-height: 1.6; }
+
+  .log-comment {
+    font-size: 12px; color: var(--ink-mid);
+    background: var(--bg); border-left: 3px solid var(--border);
+    padding: 6px 10px; border-radius: 0 6px 6px 0;
+    margin-bottom: 10px;
+  }
+
+  .log-actions { display: flex; gap: 8px; }
+
+  /* ── REVIEWED LOG ────────────────────────── */
+  .rev-item {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    padding: 14px 22px; border-bottom: 1px solid var(--border);
+    gap: 12px; transition: background .15s;
+  }
+  .rev-item:last-child { border-bottom: none; }
+  .rev-item:hover { background: var(--bg); }
+  .rev-main { flex: 1; min-width: 0; }
+  .rev-title { font-size: 13.5px; font-weight: 500; color: var(--ink); margin-bottom: 3px; }
+  .rev-meta  { font-size: 12px; color: var(--ink-light); line-height: 1.6; }
+  .rev-comment {
+    margin-top: 6px; font-size: 12px; color: var(--ink-mid);
+    background: var(--bg); border-left: 3px solid var(--border);
+    padding: 5px 10px; border-radius: 0 6px 6px 0;
+  }
+  .rev-side { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+  .rev-hours { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--ink); line-height: 1; }
+  .rev-hrs-label { font-size: 10px; color: var(--ink-light); text-align: right; }
+
+  /* ── BADGES ──────────────────────────────── */
+  .badge-dut {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 11px; font-weight: 500; padding: 3px 9px;
+    border-radius: 20px; white-space: nowrap;
+  }
+  .badge-dut::before { content: '●'; font-size: 7px; }
+  .b-pending  { background: var(--amber-soft); color: var(--amber); }
+  .b-approved { background: var(--green-soft);  color: var(--green); }
+  .b-rejected { background: var(--red-soft);    color: var(--red); }
+
+  /* ── BUTTONS ─────────────────────────────── */
+  .btn-dut {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: 'DM Sans', sans-serif; font-size: 12.5px; font-weight: 500;
+    padding: 7px 14px; border-radius: 9px; border: none;
+    cursor: pointer; text-decoration: none; transition: all .18s;
+  }
+  .btn-dut-primary { background: var(--red); color: white; }
+  .btn-dut-primary:hover { background: #b00000; color: white; }
+  .btn-dut-amber { background: var(--amber-soft); color: var(--amber); border: 1px solid #fcd997; }
+  .btn-dut-amber:hover { background: #fde8b0; color: var(--amber); }
+  .btn-dut-outline { background: transparent; color: var(--ink-mid); border: 1.5px solid var(--border); }
+  .btn-dut-outline:hover { background: var(--bg); color: var(--ink); }
+
+  /* ── EMPTY STATE ─────────────────────────── */
+  .empty-state { text-align: center; padding: 28px 20px; color: var(--ink-light); font-size: 13.5px; }
+  .empty-state .e-icon { font-size: 30px; margin-bottom: 8px; }
+
+  /* ── ANIMATION ───────────────────────────── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 900px) { .dash-grid { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: 1fr 1fr 1fr; } }
+  @media (max-width: 600px) { .stats-grid { grid-template-columns: 1fr 1fr; } }
+</style>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div>
+    <div class="page-title">Supervisor Dashboard</div>
+    <div class="page-sub">Welcome back, {{ session.get('full_name', 'Supervisor') }} 👋</div>
+  </div>
 </div>
+
+<!-- STAT CARDS -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-top"><div class="stat-icon si-blue">📅</div></div>
+    <div>
+      <div class="stat-value">{{ events | length }}</div>
+      <div class="stat-label">Assigned Events</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-top"><div class="stat-icon si-amber">⏳</div></div>
+    <div>
+      <div class="stat-value">{{ pending_logs | length }}</div>
+      <div class="stat-label">Pending Reviews</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-top"><div class="stat-icon si-green">✅</div></div>
+    <div>
+      <div class="stat-value">{{ reviewed_logs | length }}</div>
+      <div class="stat-label">Logs Reviewed</div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN GRID -->
+<div class="dash-grid">
+
+  <!-- LEFT — Assigned Events -->
+  <div>
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Assigned Events</div>
+          <div class="panel-sub">Events under your supervision</div>
+        </div>
+        {% if events %}
+          <span class="panel-badge">{{ events | length }}</span>
+        {% endif %}
+      </div>
+
+      {% if events %}
+        {% for event in events %}
+        <div class="event-item">
+          <div class="event-date-box">
+            <span class="event-date-day">{{ event.date.strftime('%d') if event.date else '—' }}</span>
+            <span class="event-date-mon">{{ event.date.strftime('%b') if event.date else '—' }}</span>
+          </div>
+          <div class="event-info">
+            <div class="event-name">{{ event.title }}</div>
+            <div class="event-meta">
+              📍 {{ event.location or 'TBC' }}<br>
+              🕐 {{ event.date.strftime('%H:%M') if event.date else 'N/A' }}
+            </div>
+            <div style="margin-top:8px;">
+              <a href="{{ url_for('send_event_alert', event_id=event.id) }}" class="btn-dut btn-dut-amber">
+                🔔 Send Alert
+              </a>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state">
+          <div class="e-icon">📅</div>
+          No events assigned to you yet.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- RIGHT — Logs -->
+  <div>
+
+    <!-- Pending Logs -->
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Pending Volunteer Logs</div>
+          <div class="panel-sub">Awaiting your review</div>
+        </div>
+        {% if pending_logs %}
+          <span class="panel-badge">{{ pending_logs | length }}</span>
+        {% endif %}
+      </div>
+
+      {% if pending_logs %}
+        {% for log in pending_logs %}
+        <div class="log-item">
+          <div class="log-top">
+            <div class="log-student">
+              <div class="log-avatar av-{{ loop.index % 5 + 1 }}">
+                {{ log.student.full_name[0] if log.student.full_name else '?' }}
+              </div>
+              <div>
+                <div class="log-student-name">{{ log.student.full_name }}</div>
+                <div class="log-student-event">{{ log.event.title }}</div>
+              </div>
+            </div>
+            <span class="log-hours-badge">{{ log.hours }} hrs</span>
+          </div>
+          <div class="log-meta">
+            📝 {{ log.description or 'No description provided' }}<br>
+            🕐 Submitted {{ log.submission_date.strftime('%d %b %Y · %H:%M') }}
+          </div>
+          <div class="log-actions">
+            <a href="{{ url_for('review_hour_log', log_id=log.id) }}" class="btn-dut btn-dut-primary">
+              🔍 Review Log
+            </a>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state">
+          <div class="e-icon">🎉</div>
+          No pending logs — you're all caught up!
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Reviewed Logs -->
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Reviewed Logs</div>
+          <div class="panel-sub">Previously reviewed hour submissions</div>
+        </div>
+      </div>
+
+      {% if reviewed_logs %}
+        {% for log in reviewed_logs %}
+        <div class="rev-item">
+          <div class="rev-main">
+            <div class="rev-title">{{ log.student.full_name }}</div>
+            <div class="rev-meta">
+              📅 {{ log.event.title }}<br>
+              🕐 Reviewed {{ log.reviewed_at.strftime('%d %b %Y') if log.reviewed_at else 'N/A' }}
+            </div>
+            {% if log.supervisor_comment %}
+            <div class="rev-comment">💬 {{ log.supervisor_comment }}</div>
+            {% endif %}
+          </div>
+          <div class="rev-side">
+            <div>
+              <div class="rev-hours">{{ log.hours }}</div>
+              <div class="rev-hrs-label">hours</div>
+            </div>
+            <span class="badge-dut {% if log.status == 'approved' %}b-approved{% else %}b-rejected{% endif %}">
+              {{ log.status }}
+            </span>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state">
+          <div class="e-icon">📋</div>
+          No reviewed logs yet.
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+
 {% endblock %}

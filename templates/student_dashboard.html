@@ -1,79 +1,352 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2 class="mb-4">Student Dashboard</h2>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
 
-<div class="row">
-    <div class="col-md-7">
-        <div class="card mb-4">
-            <div class="card-header">My Registered Events</div>
-            <div class="card-body">
-                {% if registrations %}
-                    <ul class="list-group">
-                        {% for reg in registrations %}
-                            <li class="list-group-item">
-                                <strong>{{ reg.event.title }}</strong><br>
-                                Location: {{ reg.event.location }}<br>
-                                Date: {{ reg.event.date.strftime('%d %b %Y %H:%M') if reg.event.date else 'N/A' }}<br>
-                                Supervisor: {{ reg.event.supervisor.full_name if reg.event.supervisor else 'Not assigned' }}<br><br>
-                                <a href="{{ url_for('log_hours', event_id=reg.event.id) }}" class="btn btn-sm btn-primary">Log Hours</a>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p>You have not registered for any events yet.</p>
-                {% endif %}
-            </div>
-        </div>
+  :root {
+    --red:        #CC0000;
+    --red-soft:   #fff0f0;
+    --red-mid:    #ffd5d5;
+    --ink:        #1a1a2e;
+    --ink-mid:    #3d3d5c;
+    --ink-light:  #7b7b9a;
+    --bg:         #f7f7fb;
+    --surface:    #ffffff;
+    --border:     #e8e8f0;
+    --green:      #1a7a4a;
+    --green-soft: #edf7f2;
+    --amber:      #b45309;
+    --amber-soft: #fef3e2;
+    --blue:       #1565c0;
+    --blue-soft:  #e8f0fc;
+    --shadow-sm:  0 1px 4px rgba(26,26,46,.06);
+    --shadow-md:  0 4px 20px rgba(26,26,46,.09);
+    --radius:     14px;
+    --radius-sm:  8px;
+  }
 
-        <div class="card">
-            <div class="card-header">My Volunteer Logs</div>
-            <div class="card-body">
-                {% if logs %}
-                    <ul class="list-group">
-                        {% for log in logs %}
-                            <li class="list-group-item">
-                                <strong>{{ log.event.title }}</strong><br>
-                                Hours: {{ log.hours }}<br>
-                                Status:
-                                <span class="badge bg-{% if log.status == 'approved' %}success{% elif log.status == 'rejected' %}danger{% else %}warning{% endif %}">
-                                    {{ log.status }}
-                                </span><br>
-                                Description: {{ log.description or 'No description' }}<br>
-                                Comment: {{ log.supervisor_comment or 'No supervisor comment yet' }}
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p>No volunteer logs submitted yet.</p>
-                {% endif %}
-            </div>
-        </div>
-    </div>
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--ink); }
 
-    <div class="col-md-5">
-        <div class="card">
-            <div class="card-header">My Notifications</div>
-            <div class="card-body">
-                {% if notifications %}
-                    <ul class="list-group">
-                        {% for note in notifications %}
-                            <li class="list-group-item">
-                                <strong>{{ note.title }}</strong><br>
-                                {{ note.message }}<br>
-                                <small class="text-muted">{{ note.created_at.strftime('%d %b %Y %H:%M') }}</small>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p>No notifications yet.</p>
-                {% endif %}
-            </div>
-        </div>
-    </div>
+  /* ── PAGE HEADER ─────────────────────────── */
+  .page-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 28px; animation: fadeUp .3s ease both;
+  }
+  .page-title { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--ink); }
+  .page-sub   { font-size: 13px; color: var(--ink-light); margin-top: 4px; }
+
+  /* ── STAT CARDS ──────────────────────────── */
+  .stats-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 16px; margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 22px;
+    display: flex; flex-direction: column; gap: 12px;
+    box-shadow: var(--shadow-sm); transition: box-shadow .2s, transform .2s;
+    animation: fadeUp .4s ease both;
+  }
+  .stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+  .stat-card:nth-child(1) { animation-delay: .05s; }
+  .stat-card:nth-child(2) { animation-delay: .10s; }
+  .stat-card:nth-child(3) { animation-delay: .15s; }
+  .stat-card:nth-child(4) { animation-delay: .20s; }
+  .stat-top { display: flex; align-items: flex-start; justify-content: space-between; }
+  .stat-icon { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 19px; }
+  .si-red    { background: var(--red-soft); }
+  .si-green  { background: var(--green-soft); }
+  .si-amber  { background: var(--amber-soft); }
+  .si-blue   { background: var(--blue-soft); }
+  .stat-value { font-family: 'DM Serif Display', serif; font-size: 34px; color: var(--ink); line-height: 1; }
+  .stat-label { font-size: 12.5px; color: var(--ink-light); }
+
+  /* ── LAYOUT ──────────────────────────────── */
+  .dash-grid { display: grid; grid-template-columns: 1fr 380px; gap: 22px; }
+
+  /* ── PANEL ───────────────────────────────── */
+  .panel {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow-sm);
+    overflow: hidden; margin-bottom: 22px;
+    animation: fadeUp .4s ease both; animation-delay: .2s;
+  }
+  .panel-header {
+    padding: 18px 22px 14px; display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+  .panel-title { font-family: 'DM Serif Display', serif; font-size: 16px; color: var(--ink); }
+  .panel-sub   { font-size: 12px; color: var(--ink-light); margin-top: 2px; }
+  .panel-action {
+    font-size: 12px; color: var(--red); font-weight: 500;
+    cursor: pointer; text-decoration: none; padding: 5px 10px;
+    border-radius: 7px; transition: background .18s;
+  }
+  .panel-action:hover { background: var(--red-soft); color: var(--red); }
+
+  /* ── EVENT ITEM ──────────────────────────── */
+  .event-item {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 16px 22px; border-bottom: 1px solid var(--border);
+    transition: background .15s;
+  }
+  .event-item:last-child { border-bottom: none; }
+  .event-item:hover { background: var(--bg); }
+
+  .event-date-box {
+    width: 46px; height: 50px; flex-shrink: 0;
+    background: var(--red-soft); border: 1px solid var(--red-mid);
+    border-radius: 10px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  .event-date-day { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--red); line-height: 1; }
+  .event-date-mon { font-size: 9px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--red); }
+
+  .event-info { flex: 1; min-width: 0; }
+  .event-name { font-size: 13.5px; font-weight: 500; color: var(--ink); margin-bottom: 4px; }
+  .event-meta { font-size: 12px; color: var(--ink-light); line-height: 1.7; }
+
+  .event-action { flex-shrink: 0; }
+
+  /* ── LOG ITEM ────────────────────────────── */
+  .log-item {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    padding: 14px 22px; border-bottom: 1px solid var(--border);
+    gap: 12px; transition: background .15s;
+  }
+  .log-item:last-child { border-bottom: none; }
+  .log-item:hover { background: var(--bg); }
+  .log-main { flex: 1; min-width: 0; }
+  .log-title { font-size: 13.5px; font-weight: 500; color: var(--ink); margin-bottom: 3px; }
+  .log-meta  { font-size: 12px; color: var(--ink-light); line-height: 1.6; }
+  .log-comment {
+    margin-top: 6px; font-size: 12px; color: var(--ink-mid);
+    background: var(--bg); border-left: 3px solid var(--border);
+    padding: 6px 10px; border-radius: 0 6px 6px 0;
+  }
+  .log-side  { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+  .log-hours { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--ink); line-height: 1; }
+  .log-hrs-label { font-size: 10px; color: var(--ink-light); text-align: right; }
+
+  /* ── NOTIFICATION ITEM ───────────────────── */
+  .notif-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 14px 22px; border-bottom: 1px solid var(--border);
+    transition: background .15s;
+  }
+  .notif-item:last-child { border-bottom: none; }
+  .notif-item:hover { background: var(--bg); }
+  .notif-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--red); flex-shrink: 0; margin-top: 5px;
+  }
+  .notif-dot.read { background: var(--border); }
+  .notif-content { flex: 1; min-width: 0; }
+  .notif-title   { font-size: 13px; font-weight: 500; color: var(--ink); margin-bottom: 3px; }
+  .notif-msg     { font-size: 12.5px; color: var(--ink-mid); line-height: 1.5; }
+  .notif-time    { font-size: 11px; color: var(--ink-light); margin-top: 4px; }
+
+  /* ── BADGES ──────────────────────────────── */
+  .badge-dut {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 11px; font-weight: 500; padding: 3px 9px;
+    border-radius: 20px; white-space: nowrap;
+  }
+  .badge-dut::before { content: '●'; font-size: 7px; }
+  .b-pending  { background: var(--amber-soft); color: var(--amber); }
+  .b-approved { background: var(--green-soft);  color: var(--green); }
+  .b-rejected { background: var(--red-soft);    color: var(--red); }
+
+  /* ── BUTTONS ─────────────────────────────── */
+  .btn-dut {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    padding: 7px 14px; border-radius: 9px; border: none;
+    cursor: pointer; text-decoration: none; transition: all .18s;
+  }
+  .btn-dut-primary { background: var(--red); color: white; }
+  .btn-dut-primary:hover { background: #b00000; color: white; transform: translateY(-1px); }
+  .btn-dut-outline-red { background: transparent; color: var(--red); border: 1.5px solid var(--red); }
+  .btn-dut-outline-red:hover { background: var(--red-soft); color: var(--red); }
+
+  /* ── EMPTY STATE ─────────────────────────── */
+  .empty-state {
+    text-align: center; padding: 30px 20px;
+    color: var(--ink-light); font-size: 13.5px;
+  }
+  .empty-state .e-icon { font-size: 32px; margin-bottom: 8px; }
+
+  /* ── ANIMATION ───────────────────────────── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 900px) { .dash-grid { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 500px) { .stats-grid { grid-template-columns: 1fr 1fr; } }
+</style>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div>
+    <div class="page-title">My Dashboard</div>
+    <div class="page-sub">Welcome back, {{ session.get('full_name', 'Student') }} 👋</div>
+  </div>
+  <a href="{{ url_for('student_events') }}" class="btn-dut btn-dut-primary">📅 Browse Events</a>
 </div>
 
-<div class="mt-4">
-    <a href="{{ url_for('student_events') }}" class="btn btn-outline-primary">Browse Events</a>
+<!-- STAT CARDS -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-top"><div class="stat-icon si-blue">📅</div></div>
+    <div>
+      <div class="stat-value">{{ registrations | length }}</div>
+      <div class="stat-label">Events Registered</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-top"><div class="stat-icon si-green">✅</div></div>
+    <div>
+      <div class="stat-value">{{ logs | selectattr('status','equalto','approved') | list | length }}</div>
+      <div class="stat-label">Hours Approved</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-top"><div class="stat-icon si-amber">⏳</div></div>
+    <div>
+      <div class="stat-value">{{ logs | selectattr('status','equalto','pending') | list | length }}</div>
+      <div class="stat-label">Logs Pending</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-top"><div class="stat-icon si-red">🔔</div></div>
+    <div>
+      <div class="stat-value">{{ notifications | length }}</div>
+      <div class="stat-label">Notifications</div>
+    </div>
+  </div>
 </div>
+
+<!-- MAIN GRID -->
+<div class="dash-grid">
+
+  <!-- LEFT COLUMN -->
+  <div>
+
+    <!-- Registered Events -->
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">My Registered Events</div>
+          <div class="panel-sub">Events you have signed up for</div>
+        </div>
+        <a class="panel-action" href="{{ url_for('student_events') }}">Browse more →</a>
+      </div>
+
+      {% if registrations %}
+        {% for reg in registrations %}
+        <div class="event-item">
+          <div class="event-date-box">
+            <span class="event-date-day">{{ reg.event.date.strftime('%d') if reg.event.date else '—' }}</span>
+            <span class="event-date-mon">{{ reg.event.date.strftime('%b') if reg.event.date else '—' }}</span>
+          </div>
+          <div class="event-info">
+            <div class="event-name">{{ reg.event.title }}</div>
+            <div class="event-meta">
+              📍 {{ reg.event.location or 'TBC' }}<br>
+              🕐 {{ reg.event.date.strftime('%H:%M') if reg.event.date else 'N/A' }}&nbsp;&nbsp;
+              👤 {{ reg.event.supervisor.full_name if reg.event.supervisor else 'Not assigned' }}
+            </div>
+          </div>
+          <div class="event-action">
+            <a href="{{ url_for('log_hours', event_id=reg.event.id) }}" class="btn-dut btn-dut-primary">⏱️ Log Hours</a>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state">
+          <div class="e-icon">📅</div>
+          You haven't registered for any events yet.<br>
+          <a href="{{ url_for('student_events') }}" style="color:var(--red);font-weight:500;">Browse events →</a>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Volunteer Logs -->
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">My Volunteer Logs</div>
+          <div class="panel-sub">Your submitted hour logs and their status</div>
+        </div>
+      </div>
+
+      {% if logs %}
+        {% for log in logs %}
+        <div class="log-item">
+          <div class="log-main">
+            <div class="log-title">{{ log.event.title }}</div>
+            <div class="log-meta">
+              {{ log.description or 'No description provided' }}
+            </div>
+            {% if log.supervisor_comment %}
+            <div class="log-comment">
+              💬 {{ log.supervisor_comment }}
+            </div>
+            {% endif %}
+          </div>
+          <div class="log-side">
+            <div>
+              <div class="log-hours">{{ log.hours }}</div>
+              <div class="log-hrs-label">hours</div>
+            </div>
+            <span class="badge-dut {% if log.status == 'approved' %}b-approved{% elif log.status == 'rejected' %}b-rejected{% else %}b-pending{% endif %}">
+              {{ log.status }}
+            </span>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state">
+          <div class="e-icon">⏱️</div>
+          No volunteer logs submitted yet.
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+
+  <!-- RIGHT COLUMN — Notifications -->
+  <div>
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Notifications</div>
+          <div class="panel-sub">{{ notifications | length }} message{{ 's' if notifications | length != 1 }}</div>
+        </div>
+      </div>
+
+      {% if notifications %}
+        {% for note in notifications %}
+        <div class="notif-item">
+          <div class="notif-dot"></div>
+          <div class="notif-content">
+            <div class="notif-title">{{ note.title }}</div>
+            <div class="notif-msg">{{ note.message }}</div>
+            <div class="notif-time">{{ note.created_at.strftime('%d %b %Y · %H:%M') }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state">
+          <div class="e-icon">🔔</div>
+          No notifications yet.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
 {% endblock %}
