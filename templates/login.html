@@ -2,29 +2,43 @@
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-5">
-        <h2 class="mb-4">Login</h2>
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <h2 class="mb-4">Login</h2>
 
-        <form method="POST">
-            {{ form.hidden_tag() }}
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                  {% if messages %}
+                    {% for category, message in messages %}
+                      <div class="alert alert-{{ 'danger' if category == 'error' else category }} mb-3">
+                        {{ message }}
+                      </div>
+                    {% endfor %}
+                  {% endif %}
+                {% endwith %}
 
-            <div class="mb-3">
-                {{ form.email.label(class="form-label") }}
-                {{ form.email(class="form-control") }}
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+
+                    <div class="mb-3">
+                        {{ form.email.label(class="form-label") }}
+                        {{ form.email(class="form-control", placeholder="Enter your email") }}
+                        {% for error in form.email.errors %}
+                          <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.password.label(class="form-label") }}
+                        {{ form.password(class="form-control", placeholder="Enter your password") }}
+                        {% for error in form.password.errors %}
+                          <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    {{ form.submit(class="btn btn-primary w-100") }}
+                </form>
             </div>
-
-            <div class="mb-3">
-                {{ form.password.label(class="form-label") }}
-                {{ form.password(class="form-control") }}
-            </div>
-
-            {{ form.submit(class="btn btn-success") }}
-        </form>
-
-        <div class="mt-4">
-            <p><strong>Demo Supervisor Login:</strong></p>
-            <p>Email: supervisor@dut.ac.za</p>
-            <p>Password: super123</p>
         </div>
     </div>
 </div>

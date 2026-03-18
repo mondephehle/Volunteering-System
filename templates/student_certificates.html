@@ -1,0 +1,375 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --red:        #CC0000;
+    --red-soft:   #fff0f0;
+    --ink:        #1a1a2e;
+    --ink-light:  #7b7b9a;
+    --bg:         #f7f7fb;
+    --surface:    #ffffff;
+    --border:     #e8e8f0;
+    --green:      #1a7a4a;
+    --green-soft: #edf7f2;
+    --gold-soft:   #fff7d6;
+    --silver-soft: #f3f4f6;
+    --bronze-soft: #f8ede3;
+    --shadow-sm:  0 1px 4px rgba(26,26,46,.06);
+    --shadow-md:  0 4px 20px rgba(26,26,46,.09);
+    --radius:     14px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+  }
+
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .page-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+
+  .page-sub {
+    font-size: 13px;
+    color: var(--ink-light);
+  }
+
+  .btn-dut {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: none;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all .18s;
+  }
+
+  .btn-dut-primary {
+    background: var(--red);
+    color: white;
+  }
+
+  .btn-dut-primary:hover {
+    background: #b00000;
+    color: white;
+  }
+
+  .btn-dut-outline {
+    background: transparent;
+    color: var(--red);
+    border: 1.5px solid var(--red);
+  }
+
+  .btn-dut-outline:hover {
+    background: var(--red-soft);
+    color: var(--red);
+  }
+
+  .btn-dut-success {
+    background: transparent;
+    color: var(--green);
+    border: 1.5px solid var(--green);
+  }
+
+  .btn-dut-success:hover {
+    background: var(--green-soft);
+    color: var(--green);
+  }
+
+  .cert-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+  }
+
+  .cert-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    transition: transform .18s, box-shadow .18s;
+  }
+
+  .cert-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .cert-card-top {
+    padding: 18px 20px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .cert-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+
+  .cert-meta {
+    font-size: 12.5px;
+    color: var(--ink-light);
+    line-height: 1.7;
+  }
+
+  .cert-body {
+    padding: 16px 20px 20px;
+  }
+
+  .cert-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
+
+  .cert-gold {
+    background: var(--gold-soft);
+    color: #9a6b00;
+  }
+
+  .cert-silver {
+    background: var(--silver-soft);
+    color: #555;
+  }
+
+  .cert-bronze {
+    background: var(--bronze-soft);
+    color: #8a4f2a;
+  }
+
+  .cert-none {
+    background: #f3f4f6;
+    color: #777;
+  }
+
+  .cert-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .mini-stat {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+  }
+
+  .mini-label {
+    font-size: 11px;
+    color: var(--ink-light);
+    margin-bottom: 4px;
+  }
+
+  .mini-value {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: var(--ink);
+  }
+
+  .issue-box {
+    margin-bottom: 16px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+  }
+
+  .issue-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+
+  .issue-row {
+    font-size: 12.5px;
+    color: var(--ink-mid);
+    line-height: 1.8;
+  }
+
+  .issue-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 999px;
+  }
+
+  .issue-ready {
+    background: var(--green-soft);
+    color: var(--green);
+  }
+
+  .issue-pending {
+    background: #fef3e2;
+    color: #b45309;
+  }
+
+  .cert-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .empty-state {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--ink-light);
+  }
+
+  .empty-icon {
+    font-size: 34px;
+    margin-bottom: 8px;
+  }
+
+  @media (max-width: 900px) {
+    .cert-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<div class="page-header">
+  <div>
+    <div class="page-title">My Certificates & Badges</div>
+    <div class="page-sub">View your event-based awards and download certificates you have earned.</div>
+  </div>
+
+  <div style="display:flex; gap:10px; flex-wrap:wrap;">
+    <a href="{{ url_for('student_dashboard') }}" class="btn-dut btn-dut-outline">← Back to Dashboard</a>
+    <a href="{{ url_for('student_events') }}" class="btn-dut btn-dut-primary">Browse Events</a>
+  </div>
+</div>
+
+{% if certificate_rows %}
+  <div class="cert-grid">
+    {% for row in certificate_rows %}
+      <div class="cert-card">
+        <div class="cert-card-top">
+          <div class="cert-title">{{ row.event.title }}</div>
+          <div class="cert-meta">
+            📍 {{ row.event.location or 'TBC' }}<br>
+            🕐 {{ row.event.date.strftime('%d %b %Y · %H:%M') if row.event.date else 'N/A' }}
+          </div>
+        </div>
+
+        <div class="cert-body">
+          {% if row.level == 'Gold' %}
+            <div class="cert-badge cert-gold">🏅 Gold Certificate</div>
+          {% elif row.level == 'Silver' %}
+            <div class="cert-badge cert-silver">🥈 Silver Certificate</div>
+          {% elif row.level == 'Bronze' %}
+            <div class="cert-badge cert-bronze">🥉 Bronze Certificate</div>
+          {% else %}
+            <div class="cert-badge cert-none">No Certificate Yet</div>
+          {% endif %}
+
+          <div class="cert-stats">
+            <div class="mini-stat">
+              <div class="mini-label">Approved Hours</div>
+              <div class="mini-value">{{ row.approved_hours }}</div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-label">Total Event Hours</div>
+              <div class="mini-value">{{ row.total_event_hours }}</div>
+            </div>
+          </div>
+
+          <div class="issue-box">
+            <div class="issue-title">Certificate Issue</div>
+
+            {% if row.certificate %}
+              <div class="issue-row">
+                <strong>Status:</strong>
+                <span class="issue-pill {% if row.certificate.file_path %}issue-ready{% else %}issue-pending{% endif %}">
+                  {% if row.certificate.file_path %}
+                    Ready for Download
+                  {% else %}
+                    Generated, PDF Pending
+                  {% endif %}
+                </span>
+              </div>
+
+              <div class="issue-row">
+                <strong>Issue Date:</strong>
+                {{ row.certificate.issued_at.strftime('%d %b %Y · %H:%M') if row.certificate.issued_at else 'Not available' }}
+              </div>
+
+              <div class="issue-row">
+                <strong>Certificate Level:</strong>
+                {{ row.certificate.level or row.level }}
+              </div>
+            {% else %}
+              <div class="issue-row">No certificate has been issued for this event yet.</div>
+            {% endif %}
+          </div>
+
+          <div class="cert-meta" style="margin-bottom:16px;">
+            {% if row.level %}
+              You currently qualify for a <strong>{{ row.level }}</strong> certificate for this event.
+            {% else %}
+              You do not yet qualify for a certificate. You must complete at least 25% of the event hours with approved hours.
+            {% endif %}
+          </div>
+
+          <div class="cert-actions">
+            {% if row.level %}
+              {% if row.certificate and row.certificate.file_path %}
+                <a href="{{ url_for('download_student_certificate', event_id=row.event.id) }}" class="btn-dut btn-dut-success">
+                  ⬇ Download PDF
+                </a>
+              {% else %}
+                <form method="POST" action="{{ url_for('generate_student_certificate', event_id=row.event.id) }}" style="margin:0;">
+                  <button type="submit" class="btn-dut btn-dut-primary">🎓 Generate Certificate</button>
+                </form>
+              {% endif %}
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="empty-state">
+    <div class="empty-icon">🏅</div>
+    No certificate progress available yet.
+  </div>
+{% endif %}
+
+{% endblock %}
