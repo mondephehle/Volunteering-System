@@ -1,0 +1,6 @@
+venv/
+instance/
+*.db
+__pycache__/
+generated_certificates/
+.env
