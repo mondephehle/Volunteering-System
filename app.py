@@ -1,10 +1,22 @@
-from flask import Flask, render_template, redirect, url_for, flash, session, request
+from flask import Flask, render_template, redirect, url_for, flash, session, request, send_file
 from functools import wraps
 from datetime import datetime
+import os
+
+from reportlab.lib.pagesizes import A4, landscape
+from reportlab.pdfgen import canvas
+from werkzeug.utils import secure_filename
 
 from config import Config
 from models import db, User, Event, Registration, HourLog, Notification, Certificate
 from forms import RegisterForm, LoginForm, HourLogForm, ReviewHourLogForm, AlertForm, EventForm
+
+
+BADGE_COLORS = {
+    "Gold": "gold",
+    "Silver": "silver",
+    "Bronze": "#cd7f32"
+}
 
 
 def create_app():
@@ -57,6 +69,95 @@ def create_app():
             return f(*args, **kwargs)
         return decorated_function
 
+    def get_approved_hours(student_id, event_id):
+        total = db.session.query(db.func.sum(HourLog.hours)).filter(
+            HourLog.student_id == student_id,
+            HourLog.event_id == event_id,
+            HourLog.status == 'approved'
+        ).scalar()
+        return float(total or 0.0)
+
+    def calculate_certificate_level(approved_hours, total_event_hours):
+        if total_event_hours is None or total_event_hours <= 0:
+            return None
+
+        if approved_hours == total_event_hours:
+            return "Gold"
+        if approved_hours >= (0.5 * total_event_hours) and approved_hours < total_event_hours:
+            return "Silver"
+        if approved_hours >= (0.25 * total_event_hours) and approved_hours < (0.5 * total_event_hours):
+            return "Bronze"
+        return None
+
+    def get_or_create_certificate(student_id, event_id, issued_by=None):
+        event = Event.query.get_or_404(event_id)
+        approved_hours = get_approved_hours(student_id, event_id)
+        level = calculate_certificate_level(approved_hours, event.total_event_hours)
+
+        if not level:
+            return None, "Volunteer does not qualify for a certificate yet."
+
+        certificate = Certificate.query.filter_by(student_id=student_id, event_id=event_id).first()
+
+        if not certificate:
+            certificate = Certificate(
+                student_id=student_id,
+                event_id=event_id,
+                approved_hours=approved_hours,
+                total_event_hours=event.total_event_hours,
+                level=level,
+                issued_by=issued_by
+            )
+            db.session.add(certificate)
+        else:
+            certificate.approved_hours = approved_hours
+            certificate.total_event_hours = event.total_event_hours
+            certificate.level = level
+            certificate.issued_by = issued_by
+            certificate.issued_at = datetime.utcnow()
+
+        db.session.commit()
+        return certificate, None
+
+    def generate_certificate_pdf(certificate):
+        student = certificate.student
+        event = certificate.event
+
+        cert_dir = os.path.join(app.root_path, 'generated_certificates')
+        os.makedirs(cert_dir, exist_ok=True)
+
+        filename = f"certificate_student{student.id}_event{event.id}.pdf"
+        file_path = os.path.join(cert_dir, filename)
+
+        c = canvas.Canvas(file_path, pagesize=landscape(A4))
+        width, height = landscape(A4)
+
+        c.setFont("Helvetica-Bold", 28)
+        c.drawCentredString(width / 2, height - 100, "Certificate of Volunteering")
+
+        c.setFont("Helvetica", 16)
+        c.drawCentredString(width / 2, height - 150, "This certificate is proudly awarded to")
+
+        c.setFont("Helvetica-Bold", 24)
+        c.drawCentredString(width / 2, height - 200, student.full_name)
+
+        c.setFont("Helvetica", 16)
+        c.drawCentredString(width / 2, height - 250, f"For participation in: {event.title}")
+        c.drawCentredString(width / 2, height - 280, f"Approved Hours Worked: {certificate.approved_hours}")
+        c.drawCentredString(width / 2, height - 310, f"Total Event Hours: {certificate.total_event_hours}")
+        c.drawCentredString(width / 2, height - 340, f"Award Level: {certificate.level}")
+        c.drawCentredString(width / 2, height - 390, f"Issued on: {certificate.issued_at.strftime('%d %B %Y')}")
+
+        c.setFont("Helvetica-Oblique", 12)
+        c.drawCentredString(width / 2, 80, "DUT Volunteer Management System")
+
+        c.showPage()
+        c.save()
+
+        certificate.file_path = file_path
+        db.session.commit()
+        return file_path
+
     @app.route('/')
     def home():
         return render_template('home.html')
@@ -66,14 +167,15 @@ def create_app():
         form = RegisterForm()
 
         if form.validate_on_submit():
-            existing_user = User.query.filter_by(email=form.email.data).first()
+            email_input = form.email.data.strip().lower()
+            existing_user = User.query.filter(db.func.lower(User.email) == email_input).first()
             if existing_user:
                 flash('An account with that email already exists.', 'danger')
                 return redirect(url_for('register'))
 
             user = User(
-                full_name=form.full_name.data,
-                email=form.email.data,
+                full_name=form.full_name.data.strip(),
+                email=email_input,
                 role=form.role.data
             )
             user.set_password(form.password.data)
@@ -90,7 +192,8 @@ def create_app():
     def login():
         form = LoginForm()
         if form.validate_on_submit():
-            user = User.query.filter_by(email=form.email.data).first()
+            email_input = form.email.data.strip().lower()
+            user = User.query.filter(db.func.lower(User.email) == email_input).first()
 
             if user and user.check_password(form.password.data):
                 session['user_id'] = user.id
@@ -120,7 +223,29 @@ def create_app():
         registrations = Registration.query.filter_by(student_id=student_id).all()
         logs = HourLog.query.filter_by(student_id=student_id).all()
         notifications = Notification.query.filter_by(user_id=student_id).order_by(Notification.created_at.desc()).all()
-        return render_template('student_dashboard.html', registrations=registrations, logs=logs, notifications=notifications)
+
+        certificate_rows = []
+        for reg in registrations:
+            event = reg.event
+            approved_hours = get_approved_hours(student_id, event.id)
+            level = calculate_certificate_level(approved_hours, event.total_event_hours)
+            existing_certificate = Certificate.query.filter_by(student_id=student_id, event_id=event.id).first()
+
+            certificate_rows.append({
+                'event': event,
+                'approved_hours': approved_hours,
+                'total_event_hours': event.total_event_hours,
+                'level': level,
+                'certificate': existing_certificate
+            })
+
+        return render_template(
+            'student_dashboard.html',
+            registrations=registrations,
+            logs=logs,
+            notifications=notifications,
+            certificate_rows=certificate_rows
+        )
 
     @app.route('/student/events')
     @student_required
@@ -136,7 +261,7 @@ def create_app():
         student_id = session['user_id']
         event = Event.query.get_or_404(event_id)
 
-        if getattr(event, 'status', 'open') != 'open':
+        if event.status != 'open':
             flash('This event is not open for registration.', 'warning')
             return redirect(url_for('student_events'))
 
@@ -186,6 +311,67 @@ def create_app():
 
         return render_template('log_hours.html', form=form, event=event)
 
+    @app.route('/student/certificates')
+    @student_required
+    def student_certificates():
+        student_id = session['user_id']
+        registrations = Registration.query.filter_by(student_id=student_id).all()
+        certificate_rows = []
+
+        for reg in registrations:
+            event = reg.event
+            approved_hours = get_approved_hours(student_id, event.id)
+            level = calculate_certificate_level(approved_hours, event.total_event_hours)
+            existing_certificate = Certificate.query.filter_by(student_id=student_id, event_id=event.id).first()
+
+            certificate_rows.append({
+                'event': event,
+                'approved_hours': approved_hours,
+                'total_event_hours': event.total_event_hours,
+                'level': level,
+                'certificate': existing_certificate
+            })
+
+        return render_template(
+            'student_certificates.html',
+            certificate_rows=certificate_rows,
+            badge_colors=BADGE_COLORS
+        )
+
+    @app.route('/student/certificates/generate/<int:event_id>', methods=['POST'])
+    @student_required
+    def generate_student_certificate(event_id):
+        student_id = session['user_id']
+        certificate, error = get_or_create_certificate(student_id, event_id)
+
+        if error:
+            flash(error, 'warning')
+            return redirect(url_for('student_certificates'))
+
+        generate_certificate_pdf(certificate)
+
+        note = Notification(
+            user_id=student_id,
+            title='Certificate Ready',
+            message=f'Your {certificate.level} certificate for {certificate.event.title} is ready for download.'
+        )
+        db.session.add(note)
+        db.session.commit()
+
+        flash('Certificate generated successfully.', 'success')
+        return redirect(url_for('student_certificates'))
+
+    @app.route('/student/certificates/download/<int:event_id>')
+    @student_required
+    def download_student_certificate(event_id):
+        student_id = session['user_id']
+        certificate = Certificate.query.filter_by(student_id=student_id, event_id=event_id).first_or_404()
+
+        if not certificate.file_path or not os.path.exists(certificate.file_path):
+            generate_certificate_pdf(certificate)
+
+        return send_file(certificate.file_path, as_attachment=True)
+
     @app.route('/supervisor/dashboard')
     @supervisor_required
     def supervisor_dashboard():
@@ -196,7 +382,7 @@ def create_app():
             HourLog.query
             .join(Event, HourLog.event_id == Event.id)
             .filter(Event.supervisor_id == supervisor_id, HourLog.status == 'pending')
-            .order_by(HourLog.submission_date.desc())
+            .order_by(HourLog.submitted_at.desc())
             .all()
         )
 
@@ -222,14 +408,14 @@ def create_app():
 
         if form.validate_on_submit():
             log.status = form.status.data
-            log.supervisor_comment = form.supervisor_comment.data
+            log.comment = form.supervisor_comment.data
             log.reviewed_by = session['user_id']
             log.reviewed_at = datetime.utcnow()
 
             notification = Notification(
                 user_id=log.student_id,
                 title='Volunteer Hours Review Update',
-                message=f'Your hour log for {log.event.title} was {log.status}. Comment: {log.supervisor_comment or 'No comment provided.'}'
+                message=f"Your hour log for {log.event.title} was {log.status}. Comment: {log.comment or 'No comment provided.'}"
             )
 
             db.session.add(notification)
@@ -257,7 +443,7 @@ def create_app():
                 notification = Notification(
                     user_id=reg.student_id,
                     title=form.title.data,
-                    message=f'Event: {event.title}\n{form.message.data}'
+                    message=f"Event: {event.title}\n{form.message.data}"
                 )
                 db.session.add(notification)
 
@@ -275,12 +461,12 @@ def create_app():
         total_supervisors = User.query.filter_by(role='supervisor').count()
         total_admins = User.query.filter_by(role='admin').count()
         total_events = Event.query.count()
-        open_events = Event.query.filter_by(status='open').count() if hasattr(Event, 'status') else 0
+        open_events = Event.query.filter_by(status='open').count()
         pending_logs = HourLog.query.filter_by(status='pending').count()
         approved_logs = HourLog.query.filter_by(status='approved').count()
         total_certificates = Certificate.query.count()
 
-        recent_logs = HourLog.query.order_by(HourLog.submission_date.desc()).limit(10).all()
+        recent_logs = HourLog.query.order_by(HourLog.submitted_at.desc()).limit(10).all()
         recent_events = Event.query.order_by(Event.id.desc()).limit(5).all()
         users = User.query.order_by(User.id.desc()).all()
 
@@ -306,15 +492,12 @@ def create_app():
         form = EventForm()
 
         if form.validate_on_submit():
-            # Handle image upload
             image_filename = None
             file = request.files.get('image')
             if file and file.filename:
                 allowed = {'png', 'jpg', 'jpeg', 'webp'}
                 ext = file.filename.rsplit('.', 1)[-1].lower()
                 if ext in allowed:
-                    from werkzeug.utils import secure_filename
-                    import os
                     filename = secure_filename(file.filename)
                     unique_name = f"{int(datetime.utcnow().timestamp())}_{filename}"
                     save_path = os.path.join(app.root_path, 'static', 'uploads', 'events', unique_name)
@@ -322,8 +505,9 @@ def create_app():
                     file.save(save_path)
                     image_filename = unique_name
 
-            # Combine date and time into one datetime
             event_date = datetime.combine(form.date.data, form.time.data)
+
+            supervisor = User.query.filter_by(role='supervisor').first()
 
             event = Event(
                 title=form.title.data,
@@ -333,7 +517,9 @@ def create_app():
                 max_participants=form.max_participants.data,
                 category=form.category.data,
                 status=form.status.data,
-                image_filename=image_filename
+                total_event_hours=form.total_event_hours.data,
+                supervisor_id=supervisor.id if supervisor else None,
+                image_filename=image_filename if hasattr(Event, 'image_filename') else None
             )
 
             db.session.add(event)
@@ -352,14 +538,14 @@ def create_app():
 
         if form.validate_on_submit():
             log.status = form.status.data
-            log.supervisor_comment = form.supervisor_comment.data
+            log.comment = form.supervisor_comment.data
             log.reviewed_by = session['user_id']
             log.reviewed_at = datetime.utcnow()
 
             notification = Notification(
                 user_id=log.student_id,
                 title='Admin Review Update',
-                message=f'Your hour log for {log.event.title} was {log.status}. Comment: {log.supervisor_comment or 'No comment provided.'}'
+                message=f"Your hour log for {log.event.title} was {log.status}. Comment: {log.comment or 'No comment provided.'}"
             )
 
             db.session.add(notification)
@@ -371,26 +557,36 @@ def create_app():
         return render_template('review_hour_log.html', form=form, log=log)
 
     @app.route('/admin/certificates/issue/<int:student_id>', methods=['POST'])
+    @app.route('/admin/certificates/issue/<int:student_id>/<int:event_id>', methods=['POST'])
     @admin_required
-    def issue_certificate(student_id):
-        student = User.query.get_or_404(student_id)
+    def issue_certificate(student_id, event_id=None):
+        if event_id is None:
+            latest_approved = (
+                HourLog.query
+                .filter_by(student_id=student_id, status='approved')
+                .order_by(HourLog.submitted_at.desc())
+                .first()
+            )
+            if not latest_approved:
+                flash('No approved event hours found for this student.', 'warning')
+                return redirect(url_for('admin_dashboard'))
+            event_id = latest_approved.event_id
 
-        total_hours = db.session.query(db.func.sum(HourLog.hours)).filter(
-            HourLog.student_id == student_id,
-            HourLog.status == 'approved'
-        ).scalar() or 0
+        certificate, error = get_or_create_certificate(student_id, event_id, issued_by=session['user_id'])
+        if error:
+            flash(error, 'warning')
+            return redirect(url_for('admin_dashboard'))
 
-        certificate = Certificate(student_id=student_id, total_hours=total_hours)
-        db.session.add(certificate)
+        generate_certificate_pdf(certificate)
 
-        notification = Notification(
+        note = Notification(
             user_id=student_id,
             title='Certificate Issued',
-            message=f'Your volunteering certificate has been issued with {total_hours} approved hours.'
+            message=f'Your {certificate.level} certificate for {certificate.event.title} has been issued.'
         )
-        db.session.add(notification)
-
+        db.session.add(note)
         db.session.commit()
+
         flash('Certificate issued successfully.', 'success')
         return redirect(url_for('admin_dashboard'))
 
@@ -442,6 +638,7 @@ def create_app():
                     max_participants=20,
                     category='Community Service',
                     status='open',
+                    total_event_hours=8,
                     supervisor_id=supervisor.id if supervisor else None
                 ),
                 Event(
@@ -452,6 +649,7 @@ def create_app():
                     max_participants=50,
                     category='Environmental',
                     status='open',
+                    total_event_hours=6,
                     supervisor_id=supervisor.id if supervisor else None
                 )
             ]

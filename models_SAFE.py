@@ -13,7 +13,7 @@ class User(db.Model):
     student_number = db.Column(db.String(20), unique=True, nullable=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
-    role = db.Column(db.String(20), default="student")  # student / supervisor / admin
+    role = db.Column(db.String(20), default="student")
     department = db.Column(db.String(100), nullable=True)
     created_at = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
@@ -34,7 +34,7 @@ class Event(db.Model):
     location = db.Column(db.String(200), nullable=True)
     max_participants = db.Column(db.Integer, nullable=True)
     category = db.Column(db.String(100), nullable=True)
-    status = db.Column(db.String(20), default="open")  # open / closed / archived
+    status = db.Column(db.String(20), default="open")
     total_event_hours = db.Column(db.Float, nullable=False, default=0.0)
     supervisor_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
     created_at = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
@@ -67,7 +67,7 @@ class HourLog(db.Model):
     event_id = db.Column(db.Integer, db.ForeignKey("event.id"), nullable=False)
     hours = db.Column(db.Float, nullable=False)
     description = db.Column(db.Text, nullable=True)
-    status = db.Column(db.String(20), default="pending")  # pending / approved / rejected
+    status = db.Column(db.String(20), default="pending")
     comment = db.Column(db.Text, nullable=True)
     reviewed_by = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
     reviewed_at = db.Column(db.DateTime(timezone=True), nullable=True)
@@ -90,7 +90,7 @@ class Certificate(db.Model):
     event_id = db.Column(db.Integer, db.ForeignKey("event.id"), nullable=False)
     approved_hours = db.Column(db.Float, nullable=False, default=0.0)
     total_event_hours = db.Column(db.Float, nullable=False, default=0.0)
-    level = db.Column(db.String(20), nullable=False)  # Gold / Silver / Bronze
+    level = db.Column(db.String(20), nullable=False)
     issued_at = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     issued_by = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
     file_path = db.Column(db.String(255), nullable=True)

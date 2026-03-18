@@ -20,9 +20,9 @@
     --amber-soft: #fef3e2;
     --blue:       #1565c0;
     --blue-soft:  #e8f0fc;
-    --gold-soft:  #fff7d6;
-    --silver-soft:#f3f4f6;
-    --bronze-soft:#f8ede3;
+    --gold-soft:   #fff7d6;
+    --silver-soft: #f3f4f6;
+    --bronze-soft: #f8ede3;
     --shadow-sm:  0 1px 4px rgba(26,26,46,.06);
     --shadow-md:  0 4px 20px rgba(26,26,46,.09);
     --radius:     14px;
@@ -31,13 +31,15 @@
 
   body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--ink); }
 
+  /* ── PAGE HEADER ─────────────────────────── */
   .page-header {
     display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 28px; animation: fadeUp .3s ease both;
+    margin-bottom: 28px; animation: fadeUp .3s ease both; gap: 14px; flex-wrap: wrap;
   }
   .page-title { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--ink); }
   .page-sub   { font-size: 13px; color: var(--ink-light); margin-top: 4px; }
 
+  /* ── STAT CARDS ──────────────────────────── */
   .stats-grid {
     display: grid; grid-template-columns: repeat(4, 1fr);
     gap: 16px; margin-bottom: 28px;
@@ -63,8 +65,10 @@
   .stat-value { font-family: 'DM Serif Display', serif; font-size: 34px; color: var(--ink); line-height: 1; }
   .stat-label { font-size: 12.5px; color: var(--ink-light); }
 
+  /* ── LAYOUT ──────────────────────────────── */
   .dash-grid { display: grid; grid-template-columns: 1fr 380px; gap: 22px; }
 
+  /* ── PANEL ───────────────────────────────── */
   .panel {
     background: var(--surface); border: 1px solid var(--border);
     border-radius: var(--radius); box-shadow: var(--shadow-sm);
@@ -73,17 +77,18 @@
   }
   .panel-header {
     padding: 18px 22px 14px; display: flex; align-items: center; justify-content: space-between;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border); gap: 12px;
   }
   .panel-title { font-family: 'DM Serif Display', serif; font-size: 16px; color: var(--ink); }
   .panel-sub   { font-size: 12px; color: var(--ink-light); margin-top: 2px; }
   .panel-action {
     font-size: 12px; color: var(--red); font-weight: 500;
     cursor: pointer; text-decoration: none; padding: 5px 10px;
-    border-radius: 7px; transition: background .18s;
+    border-radius: 7px; transition: background .18s; white-space: nowrap;
   }
   .panel-action:hover { background: var(--red-soft); color: var(--red); }
 
+  /* ── EVENT ITEM ──────────────────────────── */
   .event-item {
     display: flex; align-items: flex-start; gap: 14px;
     padding: 16px 22px; border-bottom: 1px solid var(--border);
@@ -107,6 +112,7 @@
 
   .event-action { flex-shrink: 0; }
 
+  /* ── LOG ITEM ────────────────────────────── */
   .log-item {
     display: flex; align-items: flex-start; justify-content: space-between;
     padding: 14px 22px; border-bottom: 1px solid var(--border);
@@ -126,6 +132,29 @@
   .log-hours { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--ink); line-height: 1; }
   .log-hrs-label { font-size: 10px; color: var(--ink-light); text-align: right; }
 
+  /* ── CERTIFICATE ITEM ────────────────────── */
+  .cert-item {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    padding: 16px 22px; border-bottom: 1px solid var(--border);
+    gap: 12px; transition: background .15s;
+  }
+  .cert-item:last-child { border-bottom: none; }
+  .cert-item:hover { background: var(--bg); }
+  .cert-main { flex: 1; min-width: 0; }
+  .cert-title { font-size: 13.5px; font-weight: 500; color: var(--ink); margin-bottom: 4px; }
+  .cert-meta { font-size: 12px; color: var(--ink-light); line-height: 1.7; }
+  .cert-side { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0; }
+  .cert-level {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; font-weight: 600; padding: 5px 10px;
+    border-radius: 999px;
+  }
+  .cert-gold   { background: var(--gold-soft); color: #9a6b00; }
+  .cert-silver { background: var(--silver-soft); color: #555; }
+  .cert-bronze { background: var(--bronze-soft); color: #8a4f2a; }
+  .cert-none   { background: #f3f4f6; color: #777; }
+
+  /* ── NOTIFICATION ITEM ───────────────────── */
   .notif-item {
     display: flex; align-items: flex-start; gap: 12px;
     padding: 14px 22px; border-bottom: 1px solid var(--border);
@@ -143,6 +172,7 @@
   .notif-msg     { font-size: 12.5px; color: var(--ink-mid); line-height: 1.5; }
   .notif-time    { font-size: 11px; color: var(--ink-light); margin-top: 4px; }
 
+  /* ── BADGES ──────────────────────────────── */
   .badge-dut {
     display: inline-flex; align-items: center; gap: 3px;
     font-size: 11px; font-weight: 500; padding: 3px 9px;
@@ -153,28 +183,7 @@
   .b-approved { background: var(--green-soft);  color: var(--green); }
   .b-rejected { background: var(--red-soft);    color: var(--red); }
 
-  .cert-badge {
-    display: inline-flex; align-items: center; gap: 5px;
-    font-size: 11px; font-weight: 600; padding: 5px 10px;
-    border-radius: 999px;
-  }
-  .cert-gold   { background: var(--gold-soft); color: #9a6b00; }
-  .cert-silver { background: var(--silver-soft); color: #555; }
-  .cert-bronze { background: var(--bronze-soft); color: #8a4f2a; }
-  .cert-none   { background: #f3f4f6; color: #777; }
-
-  .cert-item {
-    padding: 14px 22px; border-bottom: 1px solid var(--border);
-    display: flex; justify-content: space-between; gap: 14px; align-items: flex-start;
-    transition: background .15s;
-  }
-  .cert-item:last-child { border-bottom: none; }
-  .cert-item:hover { background: var(--bg); }
-  .cert-main { flex: 1; min-width: 0; }
-  .cert-title { font-size: 13.5px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
-  .cert-meta { font-size: 12px; color: var(--ink-light); line-height: 1.7; }
-  .cert-actions { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
-
+  /* ── BUTTONS ─────────────────────────────── */
   .btn-dut {
     display: inline-flex; align-items: center; gap: 6px;
     font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
@@ -185,22 +194,28 @@
   .btn-dut-primary:hover { background: #b00000; color: white; transform: translateY(-1px); }
   .btn-dut-outline-red { background: transparent; color: var(--red); border: 1.5px solid var(--red); }
   .btn-dut-outline-red:hover { background: var(--red-soft); color: var(--red); }
-  .btn-dut-outline-green { background: transparent; color: var(--green); border: 1.5px solid var(--green); }
-  .btn-dut-outline-green:hover { background: var(--green-soft); color: var(--green); }
 
+  /* ── EMPTY STATE ─────────────────────────── */
   .empty-state {
     text-align: center; padding: 30px 20px;
     color: var(--ink-light); font-size: 13.5px;
   }
   .empty-state .e-icon { font-size: 32px; margin-bottom: 8px; }
 
+  /* ── ANIMATION ───────────────────────────── */
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(14px); }
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  @media (max-width: 900px) { .dash-grid { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: 1fr 1fr; } }
-  @media (max-width: 500px) { .stats-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 900px) {
+    .dash-grid { grid-template-columns: 1fr; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 500px) {
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+  }
 </style>
 
 <!-- PAGE HEADER -->
@@ -335,51 +350,61 @@
       {% endif %}
     </div>
 
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div>
+
     <!-- Certificates & Badges -->
     <div class="panel">
       <div class="panel-header">
         <div>
           <div class="panel-title">Certificates & Badges</div>
-          <div class="panel-sub">Your event-based award progress</div>
+          <div class="panel-sub">View your event-based awards and download certificates</div>
         </div>
         <a class="panel-action" href="{{ url_for('student_certificates') }}">View all →</a>
       </div>
 
       {% if certificate_rows %}
+        {% set shown = namespace(count=0) %}
         {% for row in certificate_rows %}
-        <div class="cert-item">
-          <div class="cert-main">
-            <div class="cert-title">{{ row.event.title }}</div>
-            <div class="cert-meta">
-              Approved Hours: {{ row.approved_hours }}<br>
-              Total Event Hours: {{ row.total_event_hours }}
-            </div>
-            <div style="margin-top:8px;">
-              {% if row.level == 'Gold' %}
-                <span class="cert-badge cert-gold">🏅 Gold Badge</span>
-              {% elif row.level == 'Silver' %}
-                <span class="cert-badge cert-silver">🥈 Silver Badge</span>
-              {% elif row.level == 'Bronze' %}
-                <span class="cert-badge cert-bronze">🥉 Bronze Badge</span>
-              {% else %}
-                <span class="cert-badge cert-none">No Certificate Yet</span>
-              {% endif %}
-            </div>
-          </div>
+          {% if row.level %}
+            {% set shown.count = shown.count + 1 %}
+            <div class="cert-item">
+              <div class="cert-main">
+                <div class="cert-title">{{ row.event.title }}</div>
+                <div class="cert-meta">
+                  Approved Hours: {{ row.approved_hours }}<br>
+                  Total Event Hours: {{ row.total_event_hours }}
+                </div>
+              </div>
+              <div class="cert-side">
+                {% if row.level == 'Gold' %}
+                  <span class="cert-level cert-gold">🏅 Gold</span>
+                {% elif row.level == 'Silver' %}
+                  <span class="cert-level cert-silver">🥈 Silver</span>
+                {% elif row.level == 'Bronze' %}
+                  <span class="cert-level cert-bronze">🥉 Bronze</span>
+                {% else %}
+                  <span class="cert-level cert-none">None</span>
+                {% endif %}
 
-          <div class="cert-actions">
-            {% if row.level %}
-              {% if row.certificate and row.certificate.file_path %}
-                <a href="{{ url_for('download_student_certificate', event_id=row.event.id) }}" class="btn-dut btn-dut-outline-green">⬇ Download PDF</a>
-              {% else %}
-                <form method="POST" action="{{ url_for('generate_student_certificate', event_id=row.event.id) }}">
-                  <button type="submit" class="btn-dut btn-dut-outline-red">🎓 Generate</button>
-                </form>
-              {% endif %}
-            {% endif %}
-          </div>
-        </div>
+                {% if row.certificate and row.certificate.file_path %}
+                  <a href="{{ url_for('download_student_certificate', event_id=row.event.id) }}" class="btn-dut btn-dut-outline-red">Download</a>
+                {% else %}
+                  <a href="{{ url_for('student_certificates') }}" class="btn-dut btn-dut-outline-red">Open</a>
+                {% endif %}
+              </div>
+            </div>
+          {% endif %}
         {% endfor %}
+
+        {% if shown.count == 0 %}
+          <div class="empty-state">
+            <div class="e-icon">🏅</div>
+            No certificate progress available yet.
+          </div>
+        {% endif %}
       {% else %}
         <div class="empty-state">
           <div class="e-icon">🏅</div>
@@ -388,10 +413,7 @@
       {% endif %}
     </div>
 
-  </div>
-
-  <!-- RIGHT COLUMN — Notifications -->
-  <div>
+    <!-- Notifications -->
     <div class="panel">
       <div class="panel-header">
         <div>

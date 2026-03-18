@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+﻿{% extends 'base.html' %}
 
 {% block content %}
 <style>
@@ -23,53 +23,66 @@
     --shadow-sm:  0 1px 4px rgba(26,26,46,.06);
     --shadow-md:  0 4px 20px rgba(26,26,46,.09);
     --radius:     14px;
-    --radius-sm:  8px;
   }
 
   body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--ink); }
 
-  /* ── PAGE HEADER ─────────────────────────── */
   .page-header {
-    display: flex; align-items: center; justify-content: space-between;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     margin-bottom: 28px;
-    animation: fadeUp .3s ease both;
+    gap: 14px;
+    flex-wrap: wrap;
   }
 
   .page-title {
     font-family: 'DM Serif Display', serif;
-    font-size: 26px; color: var(--ink);
-    line-height: 1.1;
+    font-size: 28px;
+    color: var(--ink);
+    margin-bottom: 4px;
   }
 
-  .page-sub { font-size: 13px; color: var(--ink-light); margin-top: 4px; }
+  .page-sub {
+    font-size: 13px;
+    color: var(--ink-light);
+  }
 
-  .header-actions { display: flex; gap: 10px; }
-
-  /* ── BUTTONS ─────────────────────────────── */
   .btn-dut {
-    display: inline-flex; align-items: center; gap: 7px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px; font-weight: 500;
-    padding: 9px 18px; border-radius: 10px;
-    border: none; cursor: pointer;
-    text-decoration: none; transition: all .18s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: none;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all .18s;
   }
 
   .btn-dut-primary {
-    background: var(--red); color: white;
-    box-shadow: 0 2px 8px rgba(204,0,0,.2);
+    background: var(--red);
+    color: white;
   }
 
-  .btn-dut-primary:hover { background: #b00000; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(204,0,0,.3); color: white; }
-
-  .btn-dut-warning {
-    background: var(--amber-soft); color: var(--amber);
-    border: 1px solid #fcd997;
+  .btn-dut-primary:hover {
+    background: #b00000;
+    color: white;
   }
 
-  .btn-dut-warning:hover { background: #fde8b0; color: var(--amber); }
+  .btn-dut-outline {
+    background: transparent;
+    color: var(--red);
+    border: 1.5px solid var(--red);
+  }
 
-  /* ── STAT CARDS ──────────────────────────── */
+  .btn-dut-outline:hover {
+    background: var(--red-soft);
+    color: var(--red);
+  }
+
   .stats-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -82,378 +95,225 @@
     border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 22px;
-    display: flex; flex-direction: column; gap: 12px;
     box-shadow: var(--shadow-sm);
-    transition: box-shadow .2s, transform .2s;
-    animation: fadeUp .4s ease both;
   }
 
-  .stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
-  .stat-card:nth-child(1) { animation-delay: .05s; }
-  .stat-card:nth-child(2) { animation-delay: .10s; }
-  .stat-card:nth-child(3) { animation-delay: .15s; }
-  .stat-card:nth-child(4) { animation-delay: .20s; }
-  .stat-card:nth-child(5) { animation-delay: .25s; }
-  .stat-card:nth-child(6) { animation-delay: .30s; }
-  .stat-card:nth-child(7) { animation-delay: .35s; }
-  .stat-card:nth-child(8) { animation-delay: .40s; }
-
-  .stat-top { display: flex; align-items: flex-start; justify-content: space-between; }
-
-  .stat-icon {
-    width: 42px; height: 42px; border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 19px;
+  .stat-label {
+    font-size: 12px;
+    color: var(--ink-light);
+    margin-bottom: 8px;
   }
-
-  .si-red    { background: var(--red-soft); }
-  .si-green  { background: var(--green-soft); }
-  .si-amber  { background: var(--amber-soft); }
-  .si-blue   { background: var(--blue-soft); }
-  .si-purple { background: #f3f0ff; }
 
   .stat-value {
     font-family: 'DM Serif Display', serif;
-    font-size: 34px; color: var(--ink); line-height: 1;
+    font-size: 30px;
+    color: var(--ink);
   }
 
-  .stat-label { font-size: 12.5px; color: var(--ink-light); }
-
-  /* ── PANEL ───────────────────────────────── */
   .panel {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     box-shadow: var(--shadow-sm);
     overflow: hidden;
-    animation: fadeUp .45s ease both;
-    animation-delay: .3s;
-    margin-bottom: 24px;
+    margin-bottom: 22px;
   }
 
   .panel-header {
     padding: 18px 22px 14px;
-    display: flex; align-items: center; justify-content: space-between;
     border-bottom: 1px solid var(--border);
   }
 
   .panel-title {
     font-family: 'DM Serif Display', serif;
-    font-size: 16px; color: var(--ink);
+    font-size: 18px;
+    color: var(--ink);
   }
 
-  .panel-sub { font-size: 12px; color: var(--ink-light); margin-top: 2px; }
-
-  .panel-action {
-    font-size: 12px; color: var(--red); font-weight: 500;
-    cursor: pointer; text-decoration: none;
-    padding: 5px 10px; border-radius: 7px;
-    transition: background .18s;
+  .panel-body {
+    padding: 18px 22px;
   }
 
-  .panel-action:hover { background: var(--red-soft); color: var(--red); }
-
-  /* ── LIST ITEMS ──────────────────────────── */
-  .list-dut { list-style: none; padding: 0; margin: 0; }
-
-  .list-dut-item {
-    display: flex; align-items: flex-start; justify-content: space-between;
-    padding: 14px 22px;
-    border-bottom: 1px solid var(--border);
-    transition: background .15s;
+  .simple-list {
+    display: flex;
+    flex-direction: column;
     gap: 12px;
   }
 
-  .list-dut-item:last-child { border-bottom: none; }
-  .list-dut-item:hover { background: var(--bg); }
-
-  .item-main { flex: 1; min-width: 0; }
-  .item-title { font-size: 13.5px; font-weight: 500; color: var(--ink); margin-bottom: 3px; }
-  .item-meta  { font-size: 12px; color: var(--ink-light); line-height: 1.6; }
-
-  .item-side { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
-
-  /* ── USER ITEM ───────────────────────────── */
-  .user-item {
-    display: flex; align-items: center; gap: 12px;
-    padding: 12px 22px;
-    border-bottom: 1px solid var(--border);
-    transition: background .15s;
+  .simple-item {
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg);
   }
 
-  .user-item:last-child { border-bottom: none; }
-  .user-item:hover { background: var(--bg); }
-
-  .user-avatar {
-    width: 36px; height: 36px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 13px; font-weight: 600; color: white; flex-shrink: 0;
+  .item-title {
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 4px;
   }
 
-  .av-1 { background: linear-gradient(135deg,#667eea,#764ba2); }
-  .av-2 { background: linear-gradient(135deg,#f093fb,#f5576c); }
-  .av-3 { background: linear-gradient(135deg,#4facfe,#00f2fe); }
-  .av-4 { background: linear-gradient(135deg,#43e97b,#38f9d7); }
-  .av-5 { background: linear-gradient(135deg,#fa709a,#fee140); }
+  .item-meta {
+    font-size: 12.5px;
+    color: var(--ink-light);
+    line-height: 1.7;
+  }
 
-  .user-info { flex: 1; min-width: 0; }
-  .user-name  { font-size: 13.5px; font-weight: 500; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .user-email { font-size: 11.5px; color: var(--ink-light); }
-
-  /* ── BADGES ──────────────────────────────── */
   .badge-dut {
-    display: inline-flex; align-items: center; gap: 3px;
-    font-size: 11px; font-weight: 500;
-    padding: 3px 9px; border-radius: 20px;
-    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
   }
-
-  .badge-dut::before { content: '●'; font-size: 7px; }
 
   .b-pending  { background: var(--amber-soft); color: var(--amber); }
-  .b-approved { background: var(--green-soft);  color: var(--green); }
-  .b-rejected { background: var(--red-soft);    color: var(--red); }
-  .b-open     { background: var(--blue-soft);   color: var(--blue); }
-  .b-closed   { background: #f3f3f8;            color: var(--ink-light); }
-  .b-admin    { background: var(--red-soft);    color: var(--red); }
-  .b-student  { background: var(--blue-soft);   color: var(--blue); }
-  .b-supervisor { background: var(--green-soft); color: var(--green); }
+  .b-approved { background: var(--green-soft); color: var(--green); }
+  .b-rejected { background: var(--red-soft); color: var(--red); }
 
-  /* ── ACTION BUTTONS ──────────────────────── */
-  .btn-sm-dut {
-    display: inline-flex; align-items: center; gap: 5px;
-    font-size: 12px; font-weight: 500;
-    padding: 5px 12px; border-radius: 8px;
-    border: none; cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-    text-decoration: none; transition: all .15s;
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
   }
 
-  .btn-sm-review  { background: var(--blue-soft);  color: var(--blue); }
-  .btn-sm-review:hover  { background: #d0e4ff; color: var(--blue); }
-  .btn-sm-success { background: var(--green-soft); color: var(--green); border: none; }
-  .btn-sm-success:hover { background: #d0f0e0; color: var(--green); }
-
-  /* ── TWO COL GRID ────────────────────────── */
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-
-  /* ── EMPTY STATE ─────────────────────────── */
-  .empty-state {
-    text-align: center; padding: 32px 20px;
-    color: var(--ink-light); font-size: 13.5px;
+  @media (max-width: 900px) {
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .two-col { grid-template-columns: 1fr; }
   }
 
-  /* ── ANIMATIONS ──────────────────────────── */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(14px); }
-    to   { opacity: 1; transform: translateY(0); }
+  @media (max-width: 500px) {
+    .stats-grid { grid-template-columns: 1fr 1fr; }
   }
 </style>
 
-<!-- ── PAGE HEADER ───────────────────────────── -->
 <div class="page-header">
   <div>
-    <div class="page-title">Dashboard Overview</div>
-    <div class="page-sub">Welcome back, Admin — here's what's happening today.</div>
+    <div class="page-title">Admin Dashboard</div>
+    <div class="page-sub">Manage users, events, logs, notifications, and certificates.</div>
   </div>
-  <div class="header-actions">
-    <a href="{{ url_for('admin_create_event') }}" class="btn-dut btn-dut-primary">📅 Create Event</a>
-    <a href="{{ url_for('admin_notify') }}" class="btn-dut btn-dut-warning">🔔 Send Notification</a>
+
+  <div style="display:flex; gap:10px; flex-wrap:wrap;">
+    <a href="{{ url_for('admin_create_event') }}" class="btn-dut btn-dut-primary">ÃƒÂ¢Ã…Â¾Ã¢â‚¬Â¢ Create Event</a>
+    <a href="{{ url_for('admin_notify') }}" class="btn-dut btn-dut-outline">ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂÃ¢â‚¬Â Notify Users</a>
   </div>
 </div>
 
-<!-- ── STAT CARDS ROW 1 — Users ──────────────── -->
 <div class="stats-grid">
   <div class="stat-card">
-    <div class="stat-top"><div class="stat-icon si-red">👥</div></div>
-    <div>
-      <div class="stat-value">{{ total_users }}</div>
-      <div class="stat-label">Total Users</div>
-    </div>
+    <div class="stat-label">Total Users</div>
+    <div class="stat-value">{{ total_users }}</div>
   </div>
-
   <div class="stat-card">
-    <div class="stat-top"><div class="stat-icon si-blue">🎓</div></div>
-    <div>
-      <div class="stat-value">{{ total_students }}</div>
-      <div class="stat-label">Students</div>
-    </div>
+    <div class="stat-label">Total Events</div>
+    <div class="stat-value">{{ total_events }}</div>
   </div>
-
   <div class="stat-card">
-    <div class="stat-top"><div class="stat-icon si-green">🧑‍💼</div></div>
-    <div>
-      <div class="stat-value">{{ total_supervisors }}</div>
-      <div class="stat-label">Supervisors</div>
-    </div>
+    <div class="stat-label">Pending Logs</div>
+    <div class="stat-value">{{ pending_logs }}</div>
   </div>
-
   <div class="stat-card">
-    <div class="stat-top"><div class="stat-icon si-purple">🔑</div></div>
-    <div>
-      <div class="stat-value">{{ total_admins }}</div>
-      <div class="stat-label">Admins</div>
-    </div>
+    <div class="stat-label">Certificates</div>
+    <div class="stat-value">{{ total_certificates }}</div>
   </div>
 </div>
 
-<!-- ── STAT CARDS ROW 2 — Activity ───────────── -->
-<div class="stats-grid" style="margin-bottom:32px;">
-  <div class="stat-card">
-    <div class="stat-top"><div class="stat-icon si-blue">📅</div></div>
-    <div>
-      <div class="stat-value">{{ total_events }}</div>
-      <div class="stat-label">Total Events</div>
-    </div>
-  </div>
-
-  <div class="stat-card">
-    <div class="stat-top"><div class="stat-icon si-green">✅</div></div>
-    <div>
-      <div class="stat-value">{{ open_events }}</div>
-      <div class="stat-label">Open Events</div>
-    </div>
-  </div>
-
-  <div class="stat-card">
-    <div class="stat-top"><div class="stat-icon si-amber">⏱️</div></div>
-    <div>
-      <div class="stat-value">{{ pending_logs }}</div>
-      <div class="stat-label">Pending Logs</div>
-    </div>
-  </div>
-
-  <div class="stat-card">
-    <div class="stat-top"><div class="stat-icon si-red">🎓</div></div>
-    <div>
-      <div class="stat-value">{{ total_certificates }}</div>
-      <div class="stat-label">Certificates Issued</div>
-    </div>
-  </div>
-</div>
-
-<!-- ── TWO COLUMN CONTENT ─────────────────────── -->
 <div class="two-col">
-
-  <!-- LEFT COLUMN -->
   <div>
-
-    <!-- Recent Events -->
     <div class="panel">
       <div class="panel-header">
-        <div>
-          <div class="panel-title">Recent Events</div>
-          <div class="panel-sub">Latest volunteer opportunities</div>
-        </div>
-        <a class="panel-action" href="{{ url_for('admin_create_event') }}">+ New</a>
+        <div class="panel-title">Recent Events</div>
       </div>
-
-      {% if recent_events %}
-        <ul class="list-dut">
-          {% for event in recent_events %}
-          <li class="list-dut-item">
-            <div class="item-main">
-              <div class="item-title">{{ event.title }}</div>
-              <div class="item-meta">
-                📍 {{ event.location or 'No location' }}<br>
-                🏷️ {{ event.category or 'N/A' }}
+      <div class="panel-body">
+        {% if recent_events %}
+          <div class="simple-list">
+            {% for event in recent_events %}
+              <div class="simple-item">
+                <div class="item-title">{{ event.title }}</div>
+                <div class="item-meta">
+                  Category: {{ event.category or 'N/A' }}<br>
+                  Status: {{ event.status or 'N/A' }}<br>
+                  Location: {{ event.location or 'N/A' }}<br>
+                  Total Event Hours: {{ event.total_event_hours or 0 }}
+                </div>
               </div>
-            </div>
-            <div class="item-side">
-              <span class="badge-dut {% if event.status == 'open' %}b-open{% elif event.status == 'closed' %}b-closed{% else %}b-pending{% endif %}">
-                {{ event.status if event.status else 'N/A' }}
-              </span>
-            </div>
-          </li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        <div class="empty-state">📅 No events yet.</div>
-      {% endif %}
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="item-meta">No events available.</div>
+        {% endif %}
+      </div>
     </div>
 
-    <!-- Users -->
     <div class="panel">
       <div class="panel-header">
-        <div>
-          <div class="panel-title">Users</div>
-          <div class="panel-sub">All registered users</div>
-        </div>
+        <div class="panel-title">Users</div>
       </div>
-
-      {% if users %}
-        {% for user in users %}
-        <div class="user-item">
-          <div class="user-avatar av-{{ loop.index % 5 + 1 }}">
-            {{ user.full_name[0] if user.full_name else '?' }}
+      <div class="panel-body">
+        {% if users %}
+          <div class="simple-list">
+            {% for user in users %}
+              <div class="simple-item">
+                <div class="item-title">{{ user.full_name }}</div>
+                <div class="item-meta">
+                  {{ user.email }}<br>
+                  Role: {{ user.role }}
+                </div>
+              </div>
+            {% endfor %}
           </div>
-          <div class="user-info">
-            <div class="user-name">{{ user.full_name }}</div>
-            <div class="user-email">{{ user.email }}</div>
-          </div>
-          <span class="badge-dut {% if user.role == 'admin' %}b-admin{% elif user.role == 'supervisor' %}b-supervisor{% else %}b-student{% endif %}">
-            {{ user.role }}
-          </span>
-        </div>
-        {% endfor %}
-      {% else %}
-        <div class="empty-state">👥 No users yet.</div>
-      {% endif %}
+        {% else %}
+          <div class="item-meta">No users available.</div>
+        {% endif %}
+      </div>
     </div>
-
   </div>
 
-  <!-- RIGHT COLUMN -->
   <div>
-
-    <!-- Recent Hour Logs -->
     <div class="panel">
       <div class="panel-header">
-        <div>
-          <div class="panel-title">Recent Hour Logs</div>
-          <div class="panel-sub">Latest volunteer hour submissions</div>
-        </div>
+        <div class="panel-title">Recent Hour Logs</div>
       </div>
+      <div class="panel-body">
+        {% if recent_logs %}
+          <div class="simple-list">
+            {% for log in recent_logs %}
+              <div class="simple-item">
+                <div class="item-title">{{ log.student.full_name }} ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â {{ log.event.title }}</div>
+                <div class="item-meta">
+                  Hours: {{ log.hours }}<br>
+                  Status:
+                  <span class="badge-dut {% if log.status == 'approved' %}b-approved{% elif log.status == 'rejected' %}b-rejected{% else %}b-pending{% endif %}">
+                    {{ log.status }}
+                  </span>
+                </div>
 
-      {% if recent_logs %}
-        <ul class="list-dut">
-          {% for log in recent_logs %}
-          <li class="list-dut-item">
-            <div class="item-main">
-              <div class="item-title">{{ log.student.full_name }}</div>
-              <div class="item-meta">
-                📅 {{ log.event.title }}<br>
-                ⏱️ {{ log.hours }} hours
-              </div>
-              <div style="margin-top:8px; display:flex; gap:6px; flex-wrap:wrap;">
                 {% if log.status == 'pending' %}
-                  <a href="{{ url_for('admin_review_log', log_id=log.id) }}" class="btn-sm-dut btn-sm-review">
-                    🔍 Review
-                  </a>
+                  <div style="margin-top:10px;">
+                    <a href="{{ url_for('admin_review_log', log_id=log.id) }}" class="btn-dut btn-dut-primary">Review Log</a>
+                  </div>
                 {% endif %}
+
                 {% if log.status == 'approved' %}
-                  <form method="POST" action="{{ url_for('issue_certificate', student_id=log.student_id) }}" style="margin:0;">
-                    <button type="submit" class="btn-sm-dut btn-sm-success">
-                      🎓 Issue Certificate
-                    </button>
+                  <form method="POST" action="{{ url_for('issue_certificate', student_id=log.student_id, event_id=log.event_id) }}" style="margin-top:10px;">
+                    <button type="submit" class="btn-dut btn-dut-outline">ÃƒÂ°Ã…Â¸Ã…Â½Ã¢â‚¬Å“ Issue / Re-Issue Certificate</button>
                   </form>
                 {% endif %}
               </div>
-            </div>
-            <div class="item-side">
-              <span class="badge-dut {% if log.status == 'approved' %}b-approved{% elif log.status == 'rejected' %}b-rejected{% else %}b-pending{% endif %}">
-                {{ log.status }}
-              </span>
-            </div>
-          </li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        <div class="empty-state">⏱️ No hour logs yet.</div>
-      {% endif %}
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="item-meta">No logs available.</div>
+        {% endif %}
+      </div>
     </div>
-
   </div>
 </div>
-
 {% endblock %}
+
+
+
+
+
