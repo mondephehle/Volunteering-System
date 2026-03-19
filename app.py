@@ -3,9 +3,11 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from functools import wraps
-from datetime import datetime
+from datetime import datetime,timedelta
 import os
 import re
+import hashlib
+import secrets
 
 
 from reportlab.lib.pagesizes import A4, landscape 
@@ -39,6 +41,10 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(200), nullable=False)
     role = db.Column(db.String(20), nullable=False, default='student')  
+
+    # --- Password Reset Field ----#
+    reset_token_hash = db.Column(db.String(200), nullable=True)
+    reset_token_expiry = db.Column(db.DateTime, nullable=True)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -701,58 +707,77 @@ def admin_notify():
 
 
 
-@app.route('/forgot-password')
+@app.route('/forgot-password' ,methods=['GET' , 'POST'])
 def forgot_password():
-    """Temporary placeholder for forgot password page."""
-    return "Forgot password page - coming soon. <a href='/'>Go back home</a>"
+    from forms import ForgotPasswordForm
+    form = ForgotPasswordForm()
 
+    if form.validate_on_submit():
+        email_input = form.email.data.strip().lower()
+        user = User.query.filter(db.func.lower(User.email) == email_input).first()
+
+        if user:
+            raw_token = secrets.token_urlsafe(32)
+            token_hash = hashlib.sha256(raw_token.encode()).hexdigest()
+            user.reset_token_hash = token_hash
+            user.reset_token_expiry = datetime.utcnow() + timedelta(hours=1)
+            db.session.commit()
+
+            reset_url = url_for('reset_password', token=raw_token, _external=True)
+
+            # DEV: prints link to console. Replace with real email in production.
+            print(f"\n[DEV] Password reset link for {user.email}:\n{reset_url}\n")
+            flash(
+                f'[DEV MODE] Reset link: <a href="{reset_url}">{reset_url}</a>',
+                'info'
+            )
+
+        flash('If that email is registered, a password reset link has been sent.', 'success')
+        return redirect(url_for('forgot_password'))
+
+    return render_template('forgot_password.html', form=form)
+
+
+@app.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    from forms import ResetPasswordForm
+
+    token_hash = hashlib.sha256(token.encode()).hexdigest()
+    user = User.query.filter_by(reset_token_hash=token_hash).first()
+
+    if not user or user.reset_token_expiry is None or datetime.utcnow() > user.reset_token_expiry:
+        flash('This password reset link is invalid or has expired. Please request a new one.', 'danger')
+        return redirect(url_for('forgot_password'))
+
+    form = ResetPasswordForm()
+
+    if form.validate_on_submit():
+        user.set_password(form.password.data)
+        user.reset_token_hash = None
+        user.reset_token_expiry = None
+        db.session.commit()
+
+        flash('Your password has been reset successfully. Please log in.', 'success')
+        return redirect(url_for('login'))
+
+    return render_template('reset_password.html', form=form, token=token)
 
 with app.app_context():
     db.create_all()
 
-    
+    # Create default admin if not exists
     if not User.query.filter_by(email='admin@dut.ac.za').first():
         admin = User(full_name='Default Admin', email='admin@dut.ac.za', role='admin')
         admin.set_password('admin123')
         db.session.add(admin)
 
-    
+    # Create default supervisor if not exists
     if not User.query.filter_by(email='supervisor@dut.ac.za').first():
         supervisor = User(full_name='Default Supervisor', email='supervisor@dut.ac.za', role='supervisor')
         supervisor.set_password('super123')
         db.session.add(supervisor)
 
     db.session.commit()
-
-    
-    if not Event.query.first():
-        supervisor = User.query.filter_by(email='supervisor@dut.ac.za').first()
-        sample_events = [
-            Event(
-                title='Community Garden Cleanup',
-                description='Help clean up the local community garden',
-                date=datetime(2026, 3, 15, 9, 0),
-                location='Durban Community Garden',
-                max_participants=20,
-                category='Community Service',
-                status='open',
-                total_event_hours=8,
-                supervisor_id=supervisor.id if supervisor else None
-            ),
-            Event(
-                title='Beach Cleanup Drive',
-                description='Help keep our beaches clean and safe',
-                date=datetime(2026, 3, 20, 8, 0),
-                location='Durban North Beach',
-                max_participants=50,
-                category='Environmental',
-                status='open',
-                total_event_hours=6,
-                supervisor_id=supervisor.id if supervisor else None
-            )
-        ]
-        db.session.add_all(sample_events)
-        db.session.commit()
 
 
 if __name__ == '__main__':

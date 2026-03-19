@@ -34,6 +34,10 @@
                         {% for error in form.password.errors %}
                           <div class="text-danger small mt-1">{{ error }}</div>
                         {% endfor %}
+                        <!-- Forgot Password link -->
+                        <div class="text-end mt-1">
+                            <a href="{{ url_for('forgot_password') }}" class="small text-muted">Forgot your password?</a>
+                        </div>
                     </div>
 
                     {{ form.submit(class="btn btn-primary w-100") }}
