@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, FloatField, PasswordField, SelectField, SubmitField, IntegerField, DateField, TimeField
 from wtforms.validators import DataRequired, Length, NumberRange, Optional, Email, EqualTo
+from flask_wtf.file import FileField, FileAllowed
 
 
 class RegisterForm(FlaskForm):
@@ -49,14 +50,17 @@ class EventForm(FlaskForm):
     description = TextAreaField('Description', validators=[Optional()])
     date = DateField('Event Date', validators=[DataRequired()])
     time = TimeField('Event Time', validators=[DataRequired()])
+    end_time = TimeField('End Time', validators=[DataRequired()])
     location = StringField('Location', validators=[Optional(), Length(max=200)])
     max_participants = IntegerField('Maximum Participants', validators=[Optional(), NumberRange(min=1, max=1000)])
-    total_event_hours = FloatField('Total Event Hours', validators=[DataRequired(), NumberRange(min=0.5, max=1000)])
+    total_event_hours = FloatField('Total Event Hours', validators=[Optional(), NumberRange(min=0.5, max=1000)])
     category = StringField('Category', validators=[Optional(), Length(max=100)])
     status = SelectField(
         'Status',
         choices=[('open', 'Open'), ('closed', 'Closed'), ('archived', 'Archived')],
         validators=[DataRequired()]
     )
+    supervisor_id    = SelectField('Supervisor', coerce=int, validators=[Optional()])
+    image = FileField('Event Image', validators=[FileAllowed(['jpg', 'jpeg', 'png', 'webp'], 'Images only')])
     submit = SubmitField('Save Event')
 

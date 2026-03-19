@@ -29,14 +29,11 @@
 
   body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--ink); }
 
-  /* ── PAGE HEADER ─────────────────────────── */
   .page-header {
     display: flex; align-items: center; justify-content: space-between;
     margin-bottom: 28px; animation: fadeUp .3s ease both;
   }
-
   .page-header-left { display: flex; align-items: center; gap: 14px; }
-
   .back-btn {
     display: inline-flex; align-items: center; gap: 6px;
     font-size: 13px; font-weight: 500; color: var(--ink-light);
@@ -45,7 +42,6 @@
     background: var(--surface); transition: all .18s;
   }
   .back-btn:hover { background: var(--bg); color: var(--ink); }
-
   .page-title { font-family: 'DM Serif Display', serif; font-size: 24px; color: var(--ink); }
   .page-sub   { font-size: 13px; color: var(--ink-light); margin-top: 3px; }
 
@@ -55,18 +51,15 @@
     margin-bottom: 28px; flex-wrap: wrap;
     animation: fadeUp .35s ease both; animation-delay: .05s;
   }
-
   .filter-btn {
     display: inline-flex; align-items: center; gap: 6px;
     padding: 7px 16px; border-radius: 30px;
     border: 1.5px solid var(--border); background: var(--surface);
-    font-size: 13px; font-weight: 400; color: var(--ink-mid);
+    font-size: 13px; color: var(--ink-mid);
     cursor: pointer; transition: all .18s; font-family: 'DM Sans', sans-serif;
-    text-decoration: none;
   }
   .filter-btn:hover  { border-color: var(--red); color: var(--red); background: var(--red-soft); }
   .filter-btn.active { border-color: var(--red); color: var(--red); background: var(--red-soft); font-weight: 500; }
-
   .search-bar {
     display: flex; align-items: center; gap: 8px;
     background: var(--surface); border: 1.5px solid var(--border);
@@ -76,45 +69,30 @@
   .search-bar:focus-within { border-color: var(--red); }
   .search-bar input {
     border: none; background: transparent; outline: none;
-    font-size: 13px; color: var(--ink); font-family: 'DM Sans', sans-serif;
-    width: 200px;
+    font-size: 13px; color: var(--ink); font-family: 'DM Sans', sans-serif; width: 200px;
   }
   .search-bar input::placeholder { color: var(--ink-light); }
 
   /* ── EVENT GRID ──────────────────────────── */
-  .events-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 22px;
-  }
+  .events-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
 
   /* ── EVENT CARD ──────────────────────────── */
   .event-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-    box-shadow: var(--shadow-sm);
-    transition: box-shadow .2s, transform .2s;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
+    box-shadow: var(--shadow-sm); transition: box-shadow .2s, transform .2s;
     display: flex; flex-direction: column;
     animation: fadeUp .4s ease both;
   }
   .event-card:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); }
 
-  /* Event image */
-  .event-img {
-    width: 100%; height: 175px; object-fit: cover;
-    display: block; background: var(--bg);
-  }
-
+  .event-img-wrap { position: relative; flex-shrink: 0; }
+  .event-img { width: 100%; height: 175px; object-fit: cover; display: block; background: var(--bg); }
   .event-img-placeholder {
     width: 100%; height: 175px;
     background: linear-gradient(135deg, var(--red-soft), #ffe4e4);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 48px;
+    display: flex; align-items: center; justify-content: center; font-size: 48px;
   }
-
-  /* Category tag overlaid on image */
   .event-category-tag {
     position: absolute; top: 12px; left: 12px;
     font-size: 11px; font-weight: 600; letter-spacing: .05em;
@@ -122,53 +100,69 @@
     border-radius: 20px; background: rgba(255,255,255,.92);
     color: var(--ink-mid); backdrop-filter: blur(4px);
   }
-
-  .event-img-wrap { position: relative; flex-shrink: 0; }
-
-  /* Registered ribbon */
   .registered-ribbon {
     position: absolute; top: 12px; right: 12px;
     background: var(--green); color: white;
-    font-size: 11px; font-weight: 600;
-    padding: 4px 10px; border-radius: 20px;
-    display: flex; align-items: center; gap: 4px;
+    font-size: 11px; font-weight: 600; padding: 4px 10px;
+    border-radius: 20px; display: flex; align-items: center; gap: 4px;
   }
 
   .event-body { padding: 18px 20px; flex: 1; display: flex; flex-direction: column; gap: 10px; }
-
   .event-title { font-family: 'DM Serif Display', serif; font-size: 17px; color: var(--ink); line-height: 1.25; }
-
   .event-desc {
     font-size: 13px; color: var(--ink-light); line-height: 1.6;
     display: -webkit-box; -webkit-line-clamp: 2;
     -webkit-box-orient: vertical; overflow: hidden;
   }
 
-  .event-meta-grid {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
-    margin-top: 4px;
-  }
-
+  /* ── META GRID ───────────────────────────── */
+  .event-meta-grid { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
   .event-meta-item {
-    display: flex; align-items: flex-start; gap: 6px;
+    display: flex; align-items: flex-start; gap: 8px;
     font-size: 12.5px; color: var(--ink-mid);
   }
-  .event-meta-item .meta-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
-  .event-meta-item span { line-height: 1.4; }
+  .meta-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
 
-  /* Participants bar */
+  /* ── DURATION BADGE ──────────────────────── */
+  .duration-strip {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--blue-soft); border-radius: 8px;
+    padding: 8px 12px; margin-top: 4px;
+  }
+  .duration-time {
+    font-size: 13px; font-weight: 600; color: var(--blue);
+  }
+  .duration-label { font-size: 11.5px; color: var(--ink-light); }
+  .duration-sep { color: var(--border); font-size: 14px; }
+
+  /* ── SUPERVISOR STRIP ────────────────────── */
+  .supervisor-strip {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--green-soft); border-radius: 8px;
+    padding: 8px 12px;
+  }
+  .sup-av {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--green), #38f9d7);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 10px; font-weight: 700; flex-shrink: 0;
+  }
+  .sup-info { flex: 1; min-width: 0; }
+  .sup-name { font-size: 12.5px; font-weight: 500; color: var(--green); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sup-role { font-size: 10.5px; color: var(--ink-light); }
+
+  /* ── PARTICIPANTS BAR ────────────────────── */
   .participants-row {
     display: flex; align-items: center; justify-content: space-between;
     font-size: 12px; color: var(--ink-light);
   }
   .part-bar { height: 4px; background: var(--border); border-radius: 4px; overflow: hidden; flex: 1; margin: 0 10px; }
-  .part-fill { height: 100%; background: var(--red); border-radius: 4px; transition: width .6s ease; }
+  .part-fill { height: 100%; background: var(--red); border-radius: 4px; }
 
+  /* ── CARD FOOTER ─────────────────────────── */
   .event-footer {
-    padding: 14px 20px;
-    border-top: 1px solid var(--border);
-    display: flex; gap: 8px; align-items: center;
-    background: var(--bg);
+    padding: 14px 20px; border-top: 1px solid var(--border);
+    display: flex; gap: 8px; align-items: center; background: var(--bg);
   }
 
   /* ── BADGES ──────────────────────────────── */
@@ -178,19 +172,18 @@
     border-radius: 20px; white-space: nowrap;
   }
   .badge-dut::before { content: '●'; font-size: 7px; }
-  .b-open     { background: var(--blue-soft);  color: var(--blue); }
-  .b-closed   { background: #f3f3f8;           color: var(--ink-light); }
-  .b-full     { background: var(--amber-soft); color: var(--amber); }
+  .b-open   { background: var(--blue-soft);  color: var(--blue); }
+  .b-closed { background: #f3f3f8;           color: var(--ink-light); }
 
   /* ── BUTTONS ─────────────────────────────── */
   .btn-dut {
     display: inline-flex; align-items: center; gap: 6px;
     font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
-    padding: 8px 16px; border-radius: 9px;
-    border: none; cursor: pointer; text-decoration: none; transition: all .18s;
+    padding: 8px 16px; border-radius: 9px; border: none;
+    cursor: pointer; text-decoration: none; transition: all .18s;
     flex: 1; justify-content: center;
   }
-  .btn-dut-primary  { background: var(--red);        color: white; }
+  .btn-dut-primary  { background: var(--red); color: white; }
   .btn-dut-primary:hover { background: #b00000; color: white; }
   .btn-dut-disabled { background: var(--bg); color: var(--ink-light); border: 1px solid var(--border); cursor: not-allowed; }
   .btn-dut-outline  { background: transparent; color: var(--green); border: 1.5px solid var(--green); }
@@ -203,7 +196,6 @@
     z-index: 1000; align-items: center; justify-content: center;
   }
   .modal-overlay.open { display: flex; }
-
   .modal-box {
     background: var(--surface); border-radius: var(--radius);
     box-shadow: var(--shadow-lg); width: 90%; max-width: 600px;
@@ -218,8 +210,7 @@
     background: var(--bg); border: 1px solid var(--border);
     border-radius: 8px; width: 32px; height: 32px;
     cursor: pointer; font-size: 16px; color: var(--ink-mid);
-    display: flex; align-items: center; justify-content: center;
-    transition: all .15s;
+    display: flex; align-items: center; justify-content: center; transition: all .15s;
   }
   .modal-close:hover { background: var(--red-soft); color: var(--red); border-color: var(--red-mid); }
   .modal-map { width: 100%; height: 320px; border: none; display: block; }
@@ -231,29 +222,25 @@
 
   /* ── EMPTY STATE ─────────────────────────── */
   .empty-state {
-    grid-column: 1 / -1; text-align: center;
-    padding: 60px 20px; color: var(--ink-light);
+    grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--ink-light);
   }
-  .empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-state .empty-icon  { font-size: 48px; margin-bottom: 12px; }
   .empty-state .empty-title { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--ink-mid); margin-bottom: 8px; }
-  .empty-state .empty-sub   { font-size: 14px; }
 
-  /* ── ANIMATION ───────────────────────────── */
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(14px); }
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  /* Stagger cards */
-  .event-card:nth-child(1)  { animation-delay: .05s; }
-  .event-card:nth-child(2)  { animation-delay: .10s; }
-  .event-card:nth-child(3)  { animation-delay: .15s; }
-  .event-card:nth-child(4)  { animation-delay: .20s; }
-  .event-card:nth-child(5)  { animation-delay: .25s; }
-  .event-card:nth-child(6)  { animation-delay: .30s; }
+  .event-card:nth-child(1) { animation-delay: .05s; }
+  .event-card:nth-child(2) { animation-delay: .10s; }
+  .event-card:nth-child(3) { animation-delay: .15s; }
+  .event-card:nth-child(4) { animation-delay: .20s; }
+  .event-card:nth-child(5) { animation-delay: .25s; }
+  .event-card:nth-child(6) { animation-delay: .30s; }
 
-  @media (max-width: 900px)  { .events-grid { grid-template-columns: 1fr 1fr; } }
-  @media (max-width: 600px)  { .events-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 900px) { .events-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 600px) { .events-grid { grid-template-columns: 1fr; } }
 </style>
 
 <!-- PAGE HEADER -->
@@ -286,7 +273,7 @@
   {% for event in events %}
   <div class="event-card" data-category="{{ event.category or '' }}" data-title="{{ event.title | lower }}">
 
-    <!-- Image / Placeholder -->
+    <!-- Image -->
     <div class="event-img-wrap">
       {% if event.image_filename %}
         <img class="event-img" src="{{ url_for('static', filename='uploads/events/' + event.image_filename) }}" alt="{{ event.title }}">
@@ -302,19 +289,15 @@
           {% else %}📅{% endif %}
         </div>
       {% endif %}
-
-      <!-- Category tag -->
       {% if event.category %}
         <span class="event-category-tag">{{ event.category }}</span>
       {% endif %}
-
-      <!-- Registered ribbon -->
       {% if event.id in registered_event_ids %}
         <span class="registered-ribbon">✓ Registered</span>
       {% endif %}
     </div>
 
-    <!-- Card Body -->
+    <!-- Body -->
     <div class="event-body">
       <div class="event-title">{{ event.title }}</div>
 
@@ -322,54 +305,111 @@
         <div class="event-desc">{{ event.description }}</div>
       {% endif %}
 
+      <!-- Duration strip -->
+      {% if event.date and event.end_time %}
+      <div class="duration-strip">
+        <span>⏱️</span>
+        <span class="duration-time">{{ event.date.strftime('%H:%M') }}</span>
+        <span class="duration-sep">→</span>
+        <span class="duration-time">{{ event.end_time }}</span>
+        <span class="duration-sep">·</span>
+        <span class="duration-label">
+          {% if event.date and event.end_time %}
+<div class="duration-strip">
+  <span>⏱️</span>
+  <span class="duration-time">{{ event.date.strftime('%H:%M') }}</span>
+  <span class="duration-sep">→</span>
+  <span class="duration-time">{{ event.end_time }}</span>
+  <span class="duration-sep">·</span>
+  <span class="duration-label">
+    {% set start_mins = event.date.hour * 60 + event.date.minute %}
+    {% set end_parts = event.end_time.split(':') %}
+    {% set end_mins = end_parts[0] | int * 60 + end_parts[1] | int %}
+    {% set diff = end_mins - start_mins %}
+    {% if diff > 0 %}
+      {% set h = diff // 60 %}
+      {% set m = diff % 60 %}
+      {% if h > 0 and m > 0 %}{{ h }}h {{ m }}m
+      {% elif h > 0 %}{{ h }}h
+      {% else %}{{ m }}m{% endif %}
+    {% else %}—{% endif %}
+  </span>
+</div>
+{% elif event.date %}
+<div class="duration-strip">
+  <span>🕐</span>
+  <span class="duration-time">{{ event.date.strftime('%H:%M') }}</span>
+  <span class="duration-label">Start time</span>
+</div>
+{% endif %}
+        </span>
+      </div>
+      {% elif event.date %}
+      <div class="duration-strip">
+        <span>🕐</span>
+        <span class="duration-time">{{ event.date.strftime('%H:%M') }}</span>
+        <span class="duration-label">Start time</span>
+      </div>
+      {% endif %}
+
+      <!-- Meta info -->
       <div class="event-meta-grid">
         <div class="event-meta-item">
           <span class="meta-icon">📅</span>
-          <span>{{ event.date.strftime('%d %b %Y') if event.date else 'TBC' }}<br>{{ event.date.strftime('%H:%M') if event.date else '' }}</span>
+          <span>{{ event.date.strftime('%d %b %Y') if event.date else 'TBC' }}</span>
         </div>
         <div class="event-meta-item">
-          <span class="meta-icon">👤</span>
-          <span>{{ event.supervisor.full_name if event.supervisor else 'Not assigned' }}</span>
-        </div>
-        <div class="event-meta-item" style="grid-column: 1 / -1;">
           <span class="meta-icon">📍</span>
-          <span>{{ event.location or 'TBC' }}</span>
+          <span style="flex:1;">{{ event.location or 'TBC' }}</span>
           {% if event.location %}
-            <!-- use data-attributes instead of inline JS calls -->
-            <button
-              class="map-btn"
-              type="button"
-              data-location="{{ event.location|e }}"
-              data-title="{{ event.title|e }}"
-              style="margin-left:6px; background:var(--blue-soft); color:var(--blue); border:none; border-radius:6px; padding:2px 8px; font-size:11px; cursor:pointer; font-family:'DM Sans',sans-serif; font-weight:500;"
-            >🗺️ Map</button>
+            <button onclick="openMap('{{ event.location | replace("'","\\'") }}','{{ event.title | replace("'","\\'") }}')"
+              style="background:var(--blue-soft);color:var(--blue);border:none;border-radius:6px;padding:2px 8px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;flex-shrink:0;">
+              🗺️ Map
+            </button>
           {% endif %}
         </div>
       </div>
 
+      <!-- Supervisor strip -->
+      {% if event.supervisor %}
+      <div class="supervisor-strip">
+        <div class="sup-av">
+          {{ event.supervisor.full_name.split()[0][0] }}{{ event.supervisor.full_name.split()[1][0] if event.supervisor.full_name.split()|length > 1 else '' }}
+        </div>
+        <div class="sup-info">
+          <div class="sup-name">{{ event.supervisor.full_name }}</div>
+          <div class="sup-role">Event Supervisor</div>
+        </div>
+      </div>
+      {% else %}
+      <div class="supervisor-strip" style="background:var(--bg);">
+        <div class="sup-av" style="background:var(--border); color:var(--ink-light);">?</div>
+        <div class="sup-info">
+          <div class="sup-name" style="color:var(--ink-light);">Not assigned</div>
+          <div class="sup-role">No supervisor yet</div>
+        </div>
+      </div>
+      {% endif %}
+
       <!-- Participants bar -->
       {% if event.max_participants %}
-        {# compute filled percentage safely #}
-        {% set regs = (event.registrations|length) if event.registrations is defined else 0 %}
-        {% set fill_pct = (regs * 100 / event.max_participants) if event.max_participants else 0 %}
       <div class="participants-row">
         <span>Spots</span>
-        <div class="part-bar" aria-hidden="true">
-          <div class="part-fill" data-fill="{{ (fill_pct if fill_pct <= 100 else 100) }}"></div>
-        </div>
+        <div class="part-bar"><div class="part-fill" style="width:40%;"></div></div>
         <span>{{ event.max_participants }} max</span>
       </div>
       {% endif %}
+
     </div>
 
-    <!-- Card Footer -->
+    <!-- Footer -->
     <div class="event-footer">
       {% if event.id in registered_event_ids %}
         <span class="btn-dut btn-dut-disabled">✓ Already Registered</span>
         <a href="{{ url_for('log_hours', event_id=event.id) }}" class="btn-dut btn-dut-outline">⏱️ Log Hours</a>
       {% else %}
         {% if event.status == 'open' %}
-          <form method="POST" action="{{ url_for('register_for_event', event_id=event.id) }}" style="flex:1; display:flex;">
+          <form method="POST" action="{{ url_for('register_for_event', event_id=event.id) }}" style="flex:1;display:flex;">
             <button type="submit" class="btn-dut btn-dut-primary" style="flex:1;">Register →</button>
           </form>
         {% else %}
@@ -383,7 +423,7 @@
   <div class="empty-state">
     <div class="empty-icon">📅</div>
     <div class="empty-title">No events available</div>
-    <div class="empty-sub">Check back soon — new volunteer opportunities will appear here.</div>
+    <div>Check back soon — new opportunities will appear here.</div>
   </div>
   {% endfor %}
 </div>
@@ -398,81 +438,39 @@
     <iframe class="modal-map" id="modal-iframe" src="" allowfullscreen loading="lazy"></iframe>
     <div class="modal-footer">
       <span class="modal-location" id="modal-location"></span>
-      <a id="modal-gmaps-link" href="#" target="_blank"
-        style="font-size:13px; color:var(--blue); font-weight:500; text-decoration:none;">
-        Open in Google Maps ↗
-      </a>
+      <a id="modal-gmaps-link" href="#" target="_blank" style="font-size:13px;color:var(--blue);font-weight:500;text-decoration:none;">Open in Google Maps ↗</a>
     </div>
   </div>
 </div>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    // map modal elements
-    const modal = document.getElementById('map-modal');
-    const iframe = document.getElementById('modal-iframe');
-    const gmapsLink = document.getElementById('modal-gmaps-link');
-    const modalTitle = document.getElementById('modal-title');
-    const modalLocation = document.getElementById('modal-location');
+  function openMap(location, title) {
+    const q = encodeURIComponent(location);
+    document.getElementById('modal-title').textContent    = title;
+    document.getElementById('modal-location').textContent = '📍 ' + location;
+    document.getElementById('modal-iframe').src = `https://maps.google.com/maps?q=${q}&output=embed&z=15`;
+    document.getElementById('modal-gmaps-link').href = `https://www.google.com/maps/search/?api=1&query=${q}`;
+    document.getElementById('map-modal').classList.add('open');
+  }
+  function closeMap() {
+    document.getElementById('map-modal').classList.remove('open');
+    document.getElementById('modal-iframe').src = '';
+  }
+  document.getElementById('map-modal').addEventListener('click', function(e) { if (e.target === this) closeMap(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMap(); });
 
-    function openMap(location, title) {
-      const query = encodeURIComponent(location || '');
-      if (modalTitle) modalTitle.textContent = title || 'Event Location';
-      if (modalLocation) modalLocation.textContent = '📍 ' + (location || 'TBC');
-      if (iframe) iframe.src = `https://maps.google.com/maps?q=${query}&output=embed&z=15`;
-      if (gmapsLink) gmapsLink.href = `https://www.google.com/maps/search/?api=1&query=${query}`;
-      if (modal) modal.classList.add('open');
-    }
-
-    function closeMap() {
-      if (modal) modal.classList.remove('open');
-      if (iframe) iframe.src = '';
-    }
-
-    // attach handlers to buttons (avoid inline onclick)
-    document.querySelectorAll('.map-btn').forEach(btn => {
-      btn.addEventListener('click', function () {
-        openMap(this.dataset.location, this.dataset.title);
-      });
+  function filterCards(category, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.event-card').forEach(card => {
+      card.style.display = (category === 'all' || card.dataset.category === category) ? '' : 'none';
     });
-
-    // Close modal on overlay click
-    if (modal) {
-      modal.addEventListener('click', function(e) {
-        if (e.target === modal) closeMap();
-      });
-    }
-
-    // Close on Escape key
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMap(); });
-
-    // ── Category filter ────────────────────────
-    window.filterCards = function (category, btn) {
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      if (btn) btn.classList.add('active');
-
-      document.querySelectorAll('.event-card').forEach(card => {
-        const match = category === 'all' || (card.dataset.category || '') === category;
-        card.style.display = match ? '' : 'none';
-      });
-    };
-
-    // ── Search ─────────────────────────────────
-    window.searchCards = function (val) {
-      const q = (val || '').toLowerCase().trim();
-      document.querySelectorAll('.event-card').forEach(card => {
-        const title = (card.dataset.title || '').toLowerCase();
-        const match = title.includes(q);
-        card.style.display = match ? '' : 'none';
-      });
-    };
-
-    // apply participant fill widths (avoid inline Jinja in style attr)
-    document.querySelectorAll('.part-fill').forEach(el => {
-      const pct = Math.min(100, Number(el.dataset.fill) || 0);
-      el.style.width = pct + '%';
+  }
+  function searchCards(val) {
+    const q = val.toLowerCase().trim();
+    document.querySelectorAll('.event-card').forEach(card => {
+      card.style.display = card.dataset.title.includes(q) ? '' : 'none';
     });
-  });
+  }
 </script>
-
 {% endblock %}

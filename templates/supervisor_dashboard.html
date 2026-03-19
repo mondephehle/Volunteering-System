@@ -22,13 +22,13 @@
     --blue-soft:  #e8f0fc;
     --shadow-sm:  0 1px 4px rgba(26,26,46,.06);
     --shadow-md:  0 4px 20px rgba(26,26,46,.09);
+    --shadow-lg:  0 12px 40px rgba(26,26,46,.13);
     --radius:     14px;
     --radius-sm:  8px;
   }
 
   body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--ink); }
 
-  /* ── PAGE HEADER ─────────────────────────── */
   .page-header {
     display: flex; align-items: center; justify-content: space-between;
     margin-bottom: 28px; animation: fadeUp .3s ease both;
@@ -37,10 +37,7 @@
   .page-sub   { font-size: 13px; color: var(--ink-light); margin-top: 4px; }
 
   /* ── STAT CARDS ──────────────────────────── */
-  .stats-grid {
-    display: grid; grid-template-columns: repeat(3, 1fr);
-    gap: 16px; margin-bottom: 28px;
-  }
+  .stats-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-bottom: 28px; }
   .stat-card {
     background: var(--surface); border: 1px solid var(--border);
     border-radius: var(--radius); padding: 22px;
@@ -62,7 +59,7 @@
   .stat-label { font-size: 12.5px; color: var(--ink-light); }
 
   /* ── LAYOUT ──────────────────────────────── */
-  .dash-grid { display: grid; grid-template-columns: 360px 1fr; gap: 22px; }
+  .dash-grid { display: grid; grid-template-columns: 380px 1fr; gap: 22px; }
 
   /* ── PANEL ───────────────────────────────── */
   .panel {
@@ -77,19 +74,16 @@
   }
   .panel-title { font-family: 'DM Serif Display', serif; font-size: 16px; color: var(--ink); }
   .panel-sub   { font-size: 12px; color: var(--ink-light); margin-top: 2px; }
-  .panel-badge {
-    font-size: 11px; font-weight: 600; padding: 3px 9px;
-    border-radius: 20px; background: var(--red); color: white;
-  }
+  .panel-badge { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px; background: var(--red); color: white; }
 
   /* ── EVENT ITEM ──────────────────────────── */
   .event-item {
-    display: flex; align-items: flex-start; gap: 14px;
-    padding: 16px 22px; border-bottom: 1px solid var(--border);
-    transition: background .15s;
+    padding: 16px 22px; border-bottom: 1px solid var(--border); transition: background .15s;
   }
   .event-item:last-child { border-bottom: none; }
   .event-item:hover { background: var(--bg); }
+
+  .event-top { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 12px; }
   .event-date-box {
     width: 46px; height: 50px; flex-shrink: 0;
     background: var(--red-soft); border: 1px solid var(--red-mid);
@@ -99,17 +93,32 @@
   .event-date-day { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--red); line-height: 1; }
   .event-date-mon { font-size: 9px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--red); }
   .event-info  { flex: 1; min-width: 0; }
-  .event-name  { font-size: 13.5px; font-weight: 500; color: var(--ink); margin-bottom: 4px; }
+  .event-name  { font-size: 13.5px; font-weight: 500; color: var(--ink); margin-bottom: 3px; }
   .event-meta  { font-size: 12px; color: var(--ink-light); line-height: 1.7; }
 
-  /* ── LOG ITEM ────────────────────────────── */
-  .log-item {
-    padding: 16px 22px; border-bottom: 1px solid var(--border);
-    transition: background .15s;
+  /* Duration inline */
+  .event-duration {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: var(--blue-soft); color: var(--blue);
+    font-size: 11.5px; font-weight: 500;
+    padding: 3px 9px; border-radius: 20px; margin-top: 4px;
   }
+
+  /* ── NOTIFY BUTTON ───────────────────────── */
+  .notify-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--amber-soft); color: var(--amber);
+    border: 1px solid #fcd997; border-radius: 9px;
+    font-family: 'DM Sans', sans-serif; font-size: 12.5px; font-weight: 500;
+    padding: 7px 14px; cursor: pointer; text-decoration: none;
+    transition: all .18s;
+  }
+  .notify-btn:hover { background: #fde8b0; color: var(--amber); }
+
+  /* ── LOG ITEM ────────────────────────────── */
+  .log-item { padding: 16px 22px; border-bottom: 1px solid var(--border); transition: background .15s; }
   .log-item:last-child { border-bottom: none; }
   .log-item:hover { background: var(--bg); }
-
   .log-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
   .log-student { display: flex; align-items: center; gap: 10px; }
   .log-avatar {
@@ -124,81 +133,71 @@
   .av-5 { background: linear-gradient(135deg,#fa709a,#fee140); }
   .log-student-name  { font-size: 13.5px; font-weight: 500; color: var(--ink); }
   .log-student-event { font-size: 12px; color: var(--ink-light); }
-
-  .log-hours-badge {
-    background: var(--blue-soft); color: var(--blue);
-    font-size: 12px; font-weight: 600; padding: 4px 10px;
-    border-radius: 20px; white-space: nowrap; flex-shrink: 0;
-  }
-
+  .log-hours-badge { background: var(--blue-soft); color: var(--blue); font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
   .log-meta { font-size: 12px; color: var(--ink-light); margin-bottom: 10px; line-height: 1.6; }
-
-  .log-comment {
-    font-size: 12px; color: var(--ink-mid);
-    background: var(--bg); border-left: 3px solid var(--border);
-    padding: 6px 10px; border-radius: 0 6px 6px 0;
-    margin-bottom: 10px;
-  }
-
+  .log-comment { font-size: 12px; color: var(--ink-mid); background: var(--bg); border-left: 3px solid var(--border); padding: 6px 10px; border-radius: 0 6px 6px 0; margin-bottom: 10px; }
   .log-actions { display: flex; gap: 8px; }
 
   /* ── REVIEWED LOG ────────────────────────── */
-  .rev-item {
-    display: flex; align-items: flex-start; justify-content: space-between;
-    padding: 14px 22px; border-bottom: 1px solid var(--border);
-    gap: 12px; transition: background .15s;
-  }
+  .rev-item { display: flex; align-items: flex-start; justify-content: space-between; padding: 14px 22px; border-bottom: 1px solid var(--border); gap: 12px; transition: background .15s; }
   .rev-item:last-child { border-bottom: none; }
   .rev-item:hover { background: var(--bg); }
   .rev-main { flex: 1; min-width: 0; }
   .rev-title { font-size: 13.5px; font-weight: 500; color: var(--ink); margin-bottom: 3px; }
   .rev-meta  { font-size: 12px; color: var(--ink-light); line-height: 1.6; }
-  .rev-comment {
-    margin-top: 6px; font-size: 12px; color: var(--ink-mid);
-    background: var(--bg); border-left: 3px solid var(--border);
-    padding: 5px 10px; border-radius: 0 6px 6px 0;
-  }
+  .rev-comment { margin-top: 6px; font-size: 12px; color: var(--ink-mid); background: var(--bg); border-left: 3px solid var(--border); padding: 5px 10px; border-radius: 0 6px 6px 0; }
   .rev-side { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
   .rev-hours { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--ink); line-height: 1; }
   .rev-hrs-label { font-size: 10px; color: var(--ink-light); text-align: right; }
 
   /* ── BADGES ──────────────────────────────── */
-  .badge-dut {
-    display: inline-flex; align-items: center; gap: 3px;
-    font-size: 11px; font-weight: 500; padding: 3px 9px;
-    border-radius: 20px; white-space: nowrap;
-  }
+  .badge-dut { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
   .badge-dut::before { content: '●'; font-size: 7px; }
   .b-pending  { background: var(--amber-soft); color: var(--amber); }
   .b-approved { background: var(--green-soft);  color: var(--green); }
   .b-rejected { background: var(--red-soft);    color: var(--red); }
 
   /* ── BUTTONS ─────────────────────────────── */
-  .btn-dut {
-    display: inline-flex; align-items: center; gap: 6px;
-    font-family: 'DM Sans', sans-serif; font-size: 12.5px; font-weight: 500;
-    padding: 7px 14px; border-radius: 9px; border: none;
-    cursor: pointer; text-decoration: none; transition: all .18s;
-  }
+  .btn-dut { display: inline-flex; align-items: center; gap: 6px; font-family: 'DM Sans', sans-serif; font-size: 12.5px; font-weight: 500; padding: 7px 14px; border-radius: 9px; border: none; cursor: pointer; text-decoration: none; transition: all .18s; }
   .btn-dut-primary { background: var(--red); color: white; }
   .btn-dut-primary:hover { background: #b00000; color: white; }
-  .btn-dut-amber { background: var(--amber-soft); color: var(--amber); border: 1px solid #fcd997; }
-  .btn-dut-amber:hover { background: #fde8b0; color: var(--amber); }
-  .btn-dut-outline { background: transparent; color: var(--ink-mid); border: 1.5px solid var(--border); }
-  .btn-dut-outline:hover { background: var(--bg); color: var(--ink); }
+
+  /* ── NOTIFY MODAL ────────────────────────── */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(26,26,46,.5); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal-box { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow-lg); width: 90%; max-width: 500px; overflow: hidden; animation: fadeUp .3s ease both; }
+  .modal-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .modal-title { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--ink); }
+  .modal-close { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; width: 32px; height: 32px; cursor: pointer; font-size: 16px; color: var(--ink-mid); display: flex; align-items: center; justify-content: center; transition: all .15s; }
+  .modal-close:hover { background: var(--red-soft); color: var(--red); border-color: var(--red-mid); }
+  .modal-body { padding: 22px 24px; }
+  .modal-event-tag { display: inline-flex; align-items: center; gap: 6px; background: var(--amber-soft); color: var(--amber); font-size: 12px; font-weight: 500; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; }
+  .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; background: var(--bg); }
+
+  /* form elements in modal */
+  .modal-form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+  .modal-label { font-size: 11.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-mid); }
+  .modal-input, .modal-textarea {
+    width: 100%; padding: 10px 14px; border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm); font-size: 14px;
+    font-family: 'DM Sans', sans-serif; color: var(--ink); outline: none;
+    transition: border-color .18s;
+  }
+  .modal-input:focus, .modal-textarea:focus { border-color: var(--amber); box-shadow: 0 0 0 3px rgba(180,83,9,.08); }
+  .modal-textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+  .modal-hint { font-size: 11.5px; color: var(--ink-light); }
+
+  .btn-modal-send { background: var(--amber); color: white; display: inline-flex; align-items: center; gap: 7px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; padding: 10px 22px; border-radius: 10px; border: none; cursor: pointer; transition: all .18s; }
+  .btn-modal-send:hover { background: #92400e; }
+  .btn-modal-cancel { background: transparent; color: var(--ink-mid); border: 1.5px solid var(--border); display: inline-flex; align-items: center; gap: 7px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; padding: 10px 22px; border-radius: 10px; cursor: pointer; transition: all .18s; }
+  .btn-modal-cancel:hover { background: var(--bg); }
 
   /* ── EMPTY STATE ─────────────────────────── */
   .empty-state { text-align: center; padding: 28px 20px; color: var(--ink-light); font-size: 13.5px; }
   .empty-state .e-icon { font-size: 30px; margin-bottom: 8px; }
 
-  /* ── ANIMATION ───────────────────────────── */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(14px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  @media (max-width: 900px) { .dash-grid { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: 1fr 1fr 1fr; } }
-  @media (max-width: 600px) { .stats-grid { grid-template-columns: 1fr 1fr; } }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+  @media (max-width: 900px) { .dash-grid { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: repeat(3,1fr); } }
 </style>
 
 <!-- PAGE HEADER -->
@@ -213,24 +212,15 @@
 <div class="stats-grid">
   <div class="stat-card">
     <div class="stat-top"><div class="stat-icon si-blue">📅</div></div>
-    <div>
-      <div class="stat-value">{{ events | length }}</div>
-      <div class="stat-label">Assigned Events</div>
-    </div>
+    <div><div class="stat-value">{{ events | length }}</div><div class="stat-label">Assigned Events</div></div>
   </div>
   <div class="stat-card">
     <div class="stat-top"><div class="stat-icon si-amber">⏳</div></div>
-    <div>
-      <div class="stat-value">{{ pending_logs | length }}</div>
-      <div class="stat-label">Pending Reviews</div>
-    </div>
+    <div><div class="stat-value">{{ pending_logs | length }}</div><div class="stat-label">Pending Reviews</div></div>
   </div>
   <div class="stat-card">
     <div class="stat-top"><div class="stat-icon si-green">✅</div></div>
-    <div>
-      <div class="stat-value">{{ reviewed_logs | length }}</div>
-      <div class="stat-label">Logs Reviewed</div>
-    </div>
+    <div><div class="stat-value">{{ reviewed_logs | length }}</div><div class="stat-label">Logs Reviewed</div></div>
   </div>
 </div>
 
@@ -243,39 +233,51 @@
       <div class="panel-header">
         <div>
           <div class="panel-title">Assigned Events</div>
-          <div class="panel-sub">Events under your supervision</div>
+          <div class="panel-sub">Send alerts to registered volunteers</div>
         </div>
-        {% if events %}
-          <span class="panel-badge">{{ events | length }}</span>
-        {% endif %}
+        {% if events %}<span class="panel-badge">{{ events | length }}</span>{% endif %}
       </div>
 
       {% if events %}
         {% for event in events %}
         <div class="event-item">
-          <div class="event-date-box">
-            <span class="event-date-day">{{ event.date.strftime('%d') if event.date else '—' }}</span>
-            <span class="event-date-mon">{{ event.date.strftime('%b') if event.date else '—' }}</span>
-          </div>
-          <div class="event-info">
-            <div class="event-name">{{ event.title }}</div>
-            <div class="event-meta">
-              📍 {{ event.location or 'TBC' }}<br>
-              🕐 {{ event.date.strftime('%H:%M') if event.date else 'N/A' }}
+          <div class="event-top">
+            <div class="event-date-box">
+              <span class="event-date-day">{{ event.date.strftime('%d') if event.date else '—' }}</span>
+              <span class="event-date-mon">{{ event.date.strftime('%b') if event.date else '—' }}</span>
             </div>
-            <div style="margin-top:8px;">
-              <a href="{{ url_for('send_event_alert', event_id=event.id) }}" class="btn-dut btn-dut-amber">
-                🔔 Send Alert
-              </a>
+            <div class="event-info">
+              <div class="event-name">{{ event.title }}</div>
+              <div class="event-meta">
+                📍 {{ event.location or 'TBC' }}<br>
+                🕐 {{ event.date.strftime('%H:%M') if event.date else 'N/A' }}
+                {% if event.end_time %} → {{ event.end_time }} {% endif %}
+              </div>
+              {% if event.date and event.end_time %}
+<div style="margin-top:5px;">
+  <span class="event-duration">
+    ⏱️
+    {% set s = event.date.hour * 60 + event.date.minute %}
+    {% set end_parts = event.end_time.split(':') %}
+    {% set e = end_parts[0] | int * 60 + end_parts[1] | int %}
+    {% set d = e - s %}
+    {% if d > 0 %}
+      {% set h = d // 60 %}{% set m = d % 60 %}
+      {% if h > 0 and m > 0 %}{{ h }}h {{ m }}m{% elif h > 0 %}{{ h }}h{% else %}{{ m }}m{% endif %}
+    {% else %}—{% endif %}
+  </span>
+</div>
+{% endif %}
             </div>
           </div>
+          <!-- Send Alert button opens modal -->
+          <button class="notify-btn" onclick="openNotify({{ event.id }}, '{{ event.title | replace("'", "\\'") }}')">
+            🔔 Send Alert to Volunteers
+          </button>
         </div>
         {% endfor %}
       {% else %}
-        <div class="empty-state">
-          <div class="e-icon">📅</div>
-          No events assigned to you yet.
-        </div>
+        <div class="empty-state"><div class="e-icon">📅</div>No events assigned yet.</div>
       {% endif %}
     </div>
   </div>
@@ -290,9 +292,7 @@
           <div class="panel-title">Pending Volunteer Logs</div>
           <div class="panel-sub">Awaiting your review</div>
         </div>
-        {% if pending_logs %}
-          <span class="panel-badge">{{ pending_logs | length }}</span>
-        {% endif %}
+        {% if pending_logs %}<span class="panel-badge">{{ pending_logs | length }}</span>{% endif %}
       </div>
 
       {% if pending_logs %}
@@ -311,21 +311,16 @@
             <span class="log-hours-badge">{{ log.hours }} hrs</span>
           </div>
           <div class="log-meta">
-            📝 {{ log.description or 'No description provided' }}<br>
+            📝 {{ log.description or 'No description' }}<br>
             🕐 Submitted {{ log.submission_date.strftime('%d %b %Y · %H:%M') }}
           </div>
           <div class="log-actions">
-            <a href="{{ url_for('review_hour_log', log_id=log.id) }}" class="btn-dut btn-dut-primary">
-              🔍 Review Log
-            </a>
+            <a href="{{ url_for('review_hour_log', log_id=log.id) }}" class="btn-dut btn-dut-primary">🔍 Review Log</a>
           </div>
         </div>
         {% endfor %}
       {% else %}
-        <div class="empty-state">
-          <div class="e-icon">🎉</div>
-          No pending logs — you're all caught up!
-        </div>
+        <div class="empty-state"><div class="e-icon">🎉</div>No pending logs — all caught up!</div>
       {% endif %}
     </div>
 
@@ -363,14 +358,61 @@
         </div>
         {% endfor %}
       {% else %}
-        <div class="empty-state">
-          <div class="e-icon">📋</div>
-          No reviewed logs yet.
-        </div>
+        <div class="empty-state"><div class="e-icon">📋</div>No reviewed logs yet.</div>
       {% endif %}
     </div>
 
   </div>
 </div>
+
+<!-- ── NOTIFY MODAL ───────────────────────── -->
+<div class="modal-overlay" id="notify-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-title">Send Alert to Volunteers</span>
+      <button class="modal-close" onclick="closeNotify()">✕</button>
+    </div>
+    <form method="POST" id="notify-form" action="">
+      <!-- CSRF handled by Flask-WTF on the route -->
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token is defined else '' }}">
+      <div class="modal-body">
+        <div class="modal-event-tag">
+          🔔 <span id="notify-event-name">Event</span>
+        </div>
+        <div class="modal-hint" style="margin-bottom:16px;">
+          This message will be sent as a notification to <strong>all volunteers registered for this event only</strong>.
+        </div>
+        <div class="modal-form-group">
+          <label class="modal-label">Alert Title *</label>
+          <input class="modal-input" type="text" name="title" placeholder="e.g. Important Update — Beach Cleanup" required maxlength="150">
+        </div>
+        <div class="modal-form-group" style="margin-bottom:0;">
+          <label class="modal-label">Message *</label>
+          <textarea class="modal-textarea" name="message" placeholder="Type your message to volunteers here..." required maxlength="500"></textarea>
+          <span class="modal-hint">Max 500 characters.</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-modal-cancel" onclick="closeNotify()">Cancel</button>
+        <button type="submit" class="btn-modal-send">🔔 Send Alert</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function openNotify(eventId, eventName) {
+    document.getElementById('notify-event-name').textContent = eventName;
+    document.getElementById('notify-form').action = `/supervisor/events/${eventId}/alerts`;
+    document.getElementById('notify-modal').classList.add('open');
+  }
+  function closeNotify() {
+    document.getElementById('notify-modal').classList.remove('open');
+  }
+  document.getElementById('notify-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeNotify();
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeNotify(); });
+</script>
 
 {% endblock %}

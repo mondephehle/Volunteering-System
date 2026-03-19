@@ -51,14 +51,15 @@ class Event(db.Model):
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text, nullable=False)
     date = db.Column(db.DateTime, nullable=False)
+    end_time = db.Column(db.String(10))            
     location = db.Column(db.String(200), nullable=False)
     max_participants = db.Column(db.Integer, nullable=False)
     category = db.Column(db.String(100))
-    status = db.Column(db.String(20), default='open')  
+    status = db.Column(db.String(20), default='open')
     total_event_hours = db.Column(db.Float, default=0.0)  
     image_filename = db.Column(db.String(200))
     supervisor_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     supervisor = db.relationship('User', backref='supervised_events')
 
 class Registration(db.Model):
@@ -506,21 +507,25 @@ def send_event_alert(event_id):
     form = AlertForm()
     event = Event.query.get_or_404(event_id)
 
+    # Make sure supervisor owns this event
     if event.supervisor_id != session['user_id']:
         flash('You are not allowed to send alerts for this event.', 'danger')
         return redirect(url_for('supervisor_dashboard'))
 
     if form.validate_on_submit():
+        # Only notify students registered for THIS event
         registrations = Registration.query.filter_by(event_id=event.id).all()
+
         for reg in registrations:
             notification = Notification(
                 user_id=reg.student_id,
                 title=form.title.data,
-                message=f'Event: {event.title}\n{form.message.data}'
+                message=f'[{event.title}] {form.message.data}'
             )
             db.session.add(notification)
+
         db.session.commit()
-        flash('Alert sent to all registered student volunteers.', 'success')
+        flash(f'Alert sent to {len(registrations)} registered volunteer(s).', 'success')
         return redirect(url_for('supervisor_dashboard'))
 
     return render_template('send_alert.html', form=form, event=event)
@@ -558,18 +563,28 @@ def admin_dashboard():
         users=users
     )
 
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 @app.route('/admin/events/create', methods=['GET', 'POST'])
 @admin_required
 def admin_create_event():
     form = EventForm()
 
+    supervisors = User.query.filter_by(role='supervisor').all()
+    form.supervisor_id.choices = [(0, 'Not assigned')] + [
+        (s.id, s.full_name) for s in supervisors
+    ]
+
     if form.validate_on_submit():
+        # Handle image upload
         image_filename = None
         file = request.files.get('image')
         if file and file.filename:
-            allowed = {'png', 'jpg', 'jpeg', 'webp'}
             ext = file.filename.rsplit('.', 1)[-1].lower()
-            if ext in allowed:
+            if ext in {'png', 'jpg', 'jpeg', 'webp'}:
                 filename = secure_filename(file.filename)
                 unique_name = f"{int(datetime.utcnow().timestamp())}_{filename}"
                 save_path = os.path.join(app.root_path, 'static', 'uploads', 'events', unique_name)
@@ -578,26 +593,32 @@ def admin_create_event():
                 image_filename = unique_name
 
         event_date = datetime.combine(form.date.data, form.time.data)
-
-        
-        supervisor = User.query.filter_by(role='supervisor').first()
+        supervisor_id = form.supervisor_id.data if form.supervisor_id.data != 0 else None
+        end_time_str = form.end_time.data.strftime('%H:%M') if form.end_time.data else None
+        total_hours = form.total_event_hours.data if form.total_event_hours.data else 0.0
 
         event = Event(
             title=form.title.data,
             description=form.description.data,
             date=event_date,
+            end_time=end_time_str,
             location=form.location.data,
             max_participants=form.max_participants.data,
             category=form.category.data,
             status=form.status.data,
-            total_event_hours=form.total_event_hours.data,
-            supervisor_id=supervisor.id if supervisor else None,
-            image_filename=image_filename
+            image_filename=image_filename,
+            supervisor_id=supervisor_id,
+            total_event_hours=total_hours
         )
+
         db.session.add(event)
         db.session.commit()
+
         flash('Event created successfully!', 'success')
         return redirect(url_for('admin_dashboard'))
+    else:
+        if request.method == 'POST':
+            print("FORM ERRORS:", form.errors)
 
     return render_template('admin_create_event.html', form=form)
 
