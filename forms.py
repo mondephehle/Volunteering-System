@@ -64,3 +64,22 @@ class EventForm(FlaskForm):
     image = FileField('Event Image', validators=[FileAllowed(['jpg', 'jpeg', 'png', 'webp'], 'Images only')])
     submit = SubmitField('Save Event')
 
+
+class ForgotPasswordForm(FlaskForm):
+    email = StringField(
+        'Email Address',
+        validators=[DataRequired(), Email(), Length(max=120)]
+    )
+    submit = SubmitField('Send Reset Link')
+
+
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField(
+        'New Password',
+        validators=[DataRequired(), Length(min=6, message='Password must be at least 6 characters.')]
+    )
+    confirm_password = PasswordField(
+        'Confirm New Password',
+        validators=[DataRequired(), EqualTo('password', message='Passwords must match.')]
+    )
+    submit = SubmitField('Reset Password')
