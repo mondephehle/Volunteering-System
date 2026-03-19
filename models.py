@@ -31,6 +31,7 @@ class Event(db.Model):
     title = db.Column(db.String(150), nullable=False)
     description = db.Column(db.Text, nullable=True)
     date = db.Column(db.DateTime(timezone=True), nullable=False)
+    end_time = db.Column(db.String(10))
     location = db.Column(db.String(200), nullable=True)
     max_participants = db.Column(db.Integer, nullable=True)
     category = db.Column(db.String(100), nullable=True)
@@ -38,7 +39,7 @@ class Event(db.Model):
     total_event_hours = db.Column(db.Float, nullable=False, default=0.0)
     supervisor_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
     created_at = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
-
+    image_filename = db.Column(db.String(200))
     supervisor = db.relationship("User", foreign_keys=[supervisor_id], backref="supervised_events")
 
 
