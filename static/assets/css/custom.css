@@ -1,0 +1,46 @@
+body{
+    box-sizing: border-box;
+    height: 100vh;
+}
+header{
+    background-color: black;
+    height: 10%;
+}
+main{
+    height: 92.1%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+main>div>.row {
+    width: 800px;
+    margin-top: 70px;
+    padding: 30px 50px;
+    background-color:rgb(232, 230, 230);
+    border-radius: 6px;
+}
+main> div>div {
+    width: 80%;
+    margin: 0 auto;
+}
+
+form{
+    width: 700px;
+    margin-left: 60px;
+}
+form > div{
+    display: flex;
+    width: 500px;
+}
+form > div >label{
+    width: 200px;
+}
+#reg-heading{
+    margin-left: 60px;
+}
+#login-card{
+    width: 700px;
+}
+form > #submit{
+    width: 400px;
+}

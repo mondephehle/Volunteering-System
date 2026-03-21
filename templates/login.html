@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card shadow-sm border-0">
-            <div class="card-body p-4">
+<div class="row">
+    <div class="">
+        <div class="card shadow-sm border-0" id="login-card">
+            <div class="card-body p-4" >
                 <h2 class="mb-4">Login</h2>
 
                 {% with messages = get_flashed_messages(with_categories=true) %}
@@ -40,7 +40,7 @@
                         </div>
                     </div>
 
-                    {{ form.submit(class="btn btn-primary w-100") }}
+                    {{ form.submit(class="btn btn-primary") }}
                 </form>
             </div>
         </div>
