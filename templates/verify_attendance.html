@@ -1,0 +1,52 @@
+{# templates/verify_attendance.html #}
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4" style="max-width: 520px;">
+  <h2 class="mb-1">Verify Attendance</h2>
+  <p class="text-muted mb-4">
+    Enter the code your supervisor displayed at <strong>{{ event.title }}</strong>,
+    then log the hours you worked.
+  </p>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <form method="POST" novalidate>
+        {{ form.hidden_tag() }}
+
+        {# --- Verification code --- #}
+        <div class="mb-3">
+          {{ form.verification_code.label(class="form-label fw-semibold") }}
+          {{ form.verification_code(class="form-control form-control-lg text-center text-uppercase
+              tracking-wider" + (' is-invalid' if form.verification_code.errors else ''),
+              maxlength=10, autocomplete="off") }}
+          {% for error in form.verification_code.errors %}
+            <div class="invalid-feedback">{{ error }}</div>
+          {% endfor %}
+          <small class="text-muted">6-character code — letters and numbers, e.g. A3X9KF</small>
+        </div>
+
+        {# --- Hours --- #}
+        <div class="mb-3">
+          {{ form.hours.label(class="form-label fw-semibold") }}
+          {{ form.hours(class="form-control" + (' is-invalid' if form.hours.errors else ''),
+              placeholder="e.g. 3.5") }}
+          {% for error in form.hours.errors %}
+            <div class="invalid-feedback">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        {# --- Description --- #}
+        <div class="mb-4">
+          {{ form.description.label(class="form-label fw-semibold") }}
+          {{ form.description(class="form-control", rows=3,
+              placeholder="Briefly describe what you did (optional)") }}
+        </div>
+
+        {{ form.submit(class="btn btn-success w-100") }}
+      </form>
+    </div>
+  </div>
+
+  <a href="{{ url_for('student_events') }}" class="btn btn-link mt-3">← Back to Events</a>
+</div>
+{% endblock %}

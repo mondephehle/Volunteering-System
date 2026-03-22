@@ -275,8 +275,25 @@
               👤 {{ reg.event.supervisor.full_name if reg.event.supervisor else 'Not assigned' }}
             </div>
           </div>
-          <div class="event-action">
+          <div class="event-action" style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
             <a href="{{ url_for('log_hours', event_id=reg.event.id) }}" class="btn-dut btn-dut-primary">⏱️ Log Hours</a>
+
+            {# ── Verify Attendance ── #}
+            {% if reg.attendance_verified %}
+              <span class="badge-dut b-approved">✔ Attendance Verified</span>
+            {% else %}
+              <a href="{{ url_for('verify_attendance', event_id=reg.event.id) }}"
+                 class="btn-dut btn-dut-outline-green">✅ Verify Attendance</a>
+            {% endif %}
+
+            {# ── Write a Review — only shows once hours are approved/verified ── #}
+            {% set my_log = logs | selectattr('event_id', 'equalto', reg.event.id)
+                                 | selectattr('status', 'in', ['approved', 'verified'])
+                                 | list | first %}
+            {% if my_log %}
+              <a href="{{ url_for('submit_review', event_id=reg.event.id) }}"
+                 class="btn-dut btn-dut-outline-red">✏️ Write a Review</a>
+            {% endif %}
           </div>
         </div>
         {% endfor %}
