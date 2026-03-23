@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, FloatField, PasswordField, SelectField, SubmitField, IntegerField, DateField, TimeField
+from wtforms import StringField, TextAreaField, FloatField, PasswordField, SelectField, SubmitField, IntegerField, DateField, TimeField, BooleanField
 from wtforms.validators import DataRequired, Length, NumberRange, Optional, Email, EqualTo
 from flask_wtf.file import FileField, FileAllowed
 
@@ -14,6 +14,33 @@ class RegisterForm(FlaskForm):
     )
     password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
+    
+    # Consent fields (optional by default, will be required for students)
+    data_privacy = BooleanField(
+        'I agree to the Data Privacy Policy and consent to the use of my personal information for program administration',
+        validators=[Optional()]
+    )
+    liability_waiver = BooleanField(
+        'I acknowledge and agree to the Liability Waiver. I assume all risks and will not hold the organization responsible for injuries or damages',
+        validators=[Optional()]
+    )
+    photo_media_consent = BooleanField(
+        'I consent to having my photograph and/or video recorded during the program for promotional and educational purposes',
+        validators=[Optional()]
+    )
+    background_check = BooleanField(
+        'I consent to a background check as required by the organization',
+        validators=[Optional()]
+    )
+    event_participation = BooleanField(
+        'I understand and agree to comply with all event rules and instructions during my participation',
+        validators=[Optional()]
+    )
+    program_consent = BooleanField(
+        'I certify that I am at least 18 years old and have read and agree to all terms and conditions of the volunteer program',
+        validators=[Optional()]
+    )
+    
     submit = SubmitField('Create Account')
 
 
@@ -83,3 +110,36 @@ class ResetPasswordForm(FlaskForm):
         validators=[DataRequired(), EqualTo('password', message='Passwords must match.')]
     )
     submit = SubmitField('Reset Password')
+
+
+class ConsentForm(FlaskForm):
+    full_name = StringField('Full Name', validators=[DataRequired(), Length(min=2, max=120)])
+    email = StringField('Email', validators=[DataRequired(), Email(), Length(max=120)])
+    password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
+    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
+    
+    data_privacy = BooleanField(
+        'I agree to the Data Privacy Policy and consent to the use of my personal information for program administration',
+        validators=[DataRequired(message='You must agree to the data privacy policy')]
+    )
+    liability_waiver = BooleanField(
+        'I acknowledge and agree to the Liability Waiver. I assume all risks and will not hold the organization responsible for injuries or damages',
+        validators=[DataRequired(message='You must agree to the liability waiver')]
+    )
+    photo_media_consent = BooleanField(
+        'I consent to having my photograph and/or video recorded during the program for promotional and educational purposes',
+        validators=[DataRequired(message='You must agree to photo/media consent')]
+    )
+    background_check = BooleanField(
+        'I consent to a background check as required by the organization',
+        validators=[DataRequired(message='You must agree to the background check')]
+    )
+    event_participation = BooleanField(
+        'I understand and agree to comply with all event rules and instructions during my participation',
+        validators=[DataRequired(message='You must agree to event participation terms')]
+    )
+    program_consent = BooleanField(
+        'I certify that I am at least 18 years old and have read and agree to all terms and conditions of the volunteer program',
+        validators=[DataRequired(message='You must agree to the program consent')]
+    )
+    submit = SubmitField('Create Account')

@@ -16,7 +16,7 @@ from reportlab.pdfgen import canvas
 
 from forms import (
     RegisterForm, LoginForm, EventForm, HourLogForm,
-    AlertForm, ReviewHourLogForm
+    AlertForm, ReviewHourLogForm, ConsentForm
 )
 
 
@@ -117,6 +117,20 @@ class Certificate(db.Model):
     student = db.relationship('User', foreign_keys=[student_id], backref='certificates')
     event = db.relationship('Event', backref='certificates')
     issuer = db.relationship('User', foreign_keys=[issued_by])
+
+
+class Consent(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    data_privacy = db.Column(db.Boolean, default=False)
+    liability_waiver = db.Column(db.Boolean, default=False)
+    photo_media_consent = db.Column(db.Boolean, default=False)
+    background_check = db.Column(db.Boolean, default=False)
+    event_participation = db.Column(db.Boolean, default=False)
+    program_consent = db.Column(db.Boolean, default=False)
+    agreed_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship('User', backref='consent_record')
 
 
 def get_approved_hours(student_id, event_id):
@@ -253,6 +267,22 @@ def home():
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
+        # If registering as a student, check that ALL consent fields are checked
+        if form.role.data == 'student':
+            consent_fields = {
+                'data_privacy': request.form.get('data_privacy'),
+                'liability_waiver': request.form.get('liability_waiver'),
+                'photo_media_consent': request.form.get('photo_media_consent'),
+                'background_check': request.form.get('background_check'),
+                'event_participation': request.form.get('event_participation'),
+                'program_consent': request.form.get('program_consent')
+            }
+            
+            # Check if all consent fields are checked
+            if not all(consent_fields.values()):
+                missing_consents = [key for key, value in consent_fields.items() if not value]
+                flash('⚠️ As a student, you must accept ALL consent terms before registering. Please check all boxes.', 'danger')
+                return redirect(url_for('register'))
     
         email_input = form.email.data.strip().lower()
         existing_user = User.query.filter(db.func.lower(User.email) == email_input).first()
@@ -268,11 +298,81 @@ def register():
         user.set_password(form.password.data)
 
         db.session.add(user)
+        db.session.flush()  # Get the user ID
+        
+        # If student, save consent record
+        if form.role.data == 'student':
+            consent = Consent(
+                user_id=user.id,
+                data_privacy=True,
+                liability_waiver=True,
+                photo_media_consent=True,
+                background_check=True,
+                event_participation=True,
+                program_consent=True
+            )
+            db.session.add(consent)
+        
         db.session.commit()
 
         flash('Account created successfully. Please log in.', 'success')
         return redirect(url_for('login'))
     return render_template('register.html', form=form)
+
+@app.route('/student/register', methods=['GET', 'POST'])
+def student_register():
+    form = ConsentForm()
+    if request.method == 'POST':
+        # Check if all required checkboxes are checked
+        consent_fields = {
+            'data_privacy': request.form.get('data_privacy'),
+            'liability_waiver': request.form.get('liability_waiver'),
+            'photo_media_consent': request.form.get('photo_media_consent'),
+            'background_check': request.form.get('background_check'),
+            'event_participation': request.form.get('event_participation'),
+            'program_consent': request.form.get('program_consent')
+        }
+        
+        if not all(consent_fields.values()):
+            flash('⚠️ You must accept ALL consent terms before registering. Please check all boxes.', 'danger')
+            return redirect(url_for('student_register'))
+        
+        if form.validate_on_submit():
+            email_input = form.email.data.strip().lower()
+            
+            existing_user = User.query.filter(db.func.lower(User.email) == email_input).first()
+            if existing_user:
+                flash('An account with that email already exists.', 'danger')
+                return redirect(url_for('student_register'))
+
+            user = User(
+                full_name=form.full_name.data.strip(),
+                email=email_input,
+                role='student'
+            )
+            user.set_password(form.password.data)
+
+            db.session.add(user)
+            db.session.flush()  # Get the user ID
+            
+            # Create consent record
+            consent = Consent(
+                user_id=user.id,
+                data_privacy=True,
+                liability_waiver=True,
+                photo_media_consent=True,
+                background_check=True,
+                event_participation=True,
+                program_consent=True
+            )
+            
+            db.session.add(consent)
+            db.session.commit()
+
+            flash('Account created successfully! Please log in.', 'success')
+            return redirect(url_for('login'))
+    
+    return render_template('student_register.html', form=form)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

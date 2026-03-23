@@ -116,3 +116,19 @@ class Notification(db.Model):
     created_at = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     user = db.relationship("User", backref="notifications")
+
+
+class Consent(db.Model):
+    __tablename__ = "consent"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    data_privacy = db.Column(db.Boolean, default=False)
+    liability_waiver = db.Column(db.Boolean, default=False)
+    photo_media_consent = db.Column(db.Boolean, default=False)
+    background_check = db.Column(db.Boolean, default=False)
+    event_participation = db.Column(db.Boolean, default=False)
+    program_consent = db.Column(db.Boolean, default=False)
+    agreed_at = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    
+    user = db.relationship("User", backref="consent")

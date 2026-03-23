@@ -1,34 +1,147 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<style>
+    .student-registration-form {
+        max-width: 700px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .consent-section {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 5px;
+        margin-top: 20px;
+    }
+    
+    .form-check {
+        margin-bottom: 15px;
+        padding: 10px;
+        border-radius: 4px;
+    }
+    
+    .form-check:hover {
+        background-color: #e9ecef;
+    }
+</style>
+
 <div class="row justify-content-center">
-    <div class="col-md-6">
+    <div class="col-lg-8 col-md-10">
         <h2 class="mb-4">Student Registration</h2>
 
-        <form method="POST">
+        <form method="POST" class="student-registration-form">
             {{ form.hidden_tag() }}
 
             <div class="mb-3">
                 {{ form.full_name.label(class="form-label") }}
                 {{ form.full_name(class="form-control") }}
+                {% if form.full_name.errors %}
+                    <div class="text-danger">
+                        {% for error in form.full_name.errors %}
+                            <small>{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
 
             <div class="mb-3">
                 {{ form.email.label(class="form-label") }}
                 {{ form.email(class="form-control") }}
+                {% if form.email.errors %}
+                    <div class="text-danger">
+                        {% for error in form.email.errors %}
+                            <small>{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
 
             <div class="mb-3">
                 {{ form.password.label(class="form-label") }}
                 {{ form.password(class="form-control") }}
+                {% if form.password.errors %}
+                    <div class="text-danger">
+                        {% for error in form.password.errors %}
+                            <small>{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
 
             <div class="mb-3">
                 {{ form.confirm_password.label(class="form-label") }}
                 {{ form.confirm_password(class="form-control") }}
+                {% if form.confirm_password.errors %}
+                    <div class="text-danger">
+                        {% for error in form.confirm_password.errors %}
+                            <small>{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
 
-            {{ form.submit(class="btn btn-primary") }}
+            <hr class="my-4">
+            <div class="consent-section">
+                <h5 class="mb-3">Consent & Agreements</h5>
+                <p class="text-muted"><small>Please read and agree to all of the following before registering:</small></p>
+
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="data_privacy" name="data_privacy" value="y" required>
+                        <label class="form-check-label" for="data_privacy">
+                            I agree to the Data Privacy Policy and consent to the use of my personal information for program administration
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="liability_waiver" name="liability_waiver" value="y" required>
+                        <label class="form-check-label" for="liability_waiver">
+                            I acknowledge and agree to the Liability Waiver. I assume all risks and will not hold the organization responsible for injuries or damages
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="photo_media_consent" name="photo_media_consent" value="y" required>
+                        <label class="form-check-label" for="photo_media_consent">
+                            I consent to having my photograph and/or video recorded during the program for promotional and educational purposes
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="background_check" name="background_check" value="y" required>
+                        <label class="form-check-label" for="background_check">
+                            I consent to a background check as required by the organization
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="event_participation" name="event_participation" value="y" required>
+                        <label class="form-check-label" for="event_participation">
+                            I understand and agree to comply with all event rules and instructions during my participation
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="program_consent" name="program_consent" value="y" required>
+                        <label class="form-check-label" for="program_consent">
+                            I certify that I am at least 18 years old and have read and agree to all terms and conditions of the volunteer program
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            {{ form.submit(class="btn btn-primary btn-lg") }}
         </form>
     </div>
 </div>
