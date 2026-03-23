@@ -2,12 +2,15 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
+from wtforms.validators import ValidationError
 from functools import wraps
 from datetime import datetime,timedelta
+from flask_mail import Mail, Message
 import os
 import re
 import hashlib
 import secrets
+
 
 
 from reportlab.lib.pagesizes import A4, landscape 
@@ -24,6 +27,18 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key_here'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///volunteering.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# --- Email Configuration ---
+mail = Mail(app)
+app.config['MAIL_DEFAULT_SENDER'] = 'studentvolunteeringsystem@gmail.com'
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USE_SSL'] = True   # MUST be True for 465
+app.config['MAIL_USE_TLS'] = False  # MUST be False for 465
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME') 
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = 'studentvolunteeringsystem@gmail.com'
+
 
 db = SQLAlchemy(app)
 
@@ -76,6 +91,10 @@ class Registration(db.Model):
 
     student = db.relationship('User', backref='registrations')
     event = db.relationship('Event', backref='registrations')
+
+    def validate_email(self, email):
+        if not email.data.lower().endswith('@gmail.com'):
+            raise ValidationError('Only valid Gmail accounts are allowed for registration.')
 
 class HourLog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -507,31 +526,94 @@ def review_hour_log(log_id):
 
     return render_template('review_hour_log.html', form=form, log=log)
 
-@app.route('/supervisor/events/<int:event_id>/alerts', methods=['GET', 'POST'])
-@supervisor_required
-def send_event_alert(event_id):
-    form = AlertForm()
-    event = Event.query.get_or_404(event_id)
+from flask_mail import Mail, Message
 
-    # Make sure supervisor owns this event
-    if event.supervisor_id != session['user_id']:
-        flash('You are not allowed to send alerts for this event.', 'danger')
+mail = Mail(app)
+
+from flask import current_app
+from sqlalchemy.orm import joinedload
+import logging
+from datetime import datetime
+
+@app.route('/supervisor/events/<int:event_id>/send_alert', methods=['GET', 'POST'])
+@supervisor_required
+def send_alert(event_id):
+    event = Event.query.get_or_404(event_id)
+    form = AlertForm()
+
+    # 1. Security Check
+    if event.supervisor_id != session.get('user_id'):
+        flash('Unauthorized: You can only send alerts for events you manage.', 'danger')
         return redirect(url_for('supervisor_dashboard'))
 
     if form.validate_on_submit():
-        # Only notify students registered for THIS event
-        registrations = Registration.query.filter_by(event_id=event.id).all()
+        # 2. Optimized query
+        registrations = Registration.query.options(
+            joinedload(Registration.student)
+        ).filter_by(event_id=event.id).all()
 
+        if not registrations:
+            flash('No students are currently registered for this event.', 'warning')
+            return redirect(url_for('supervisor_dashboard'))
+
+        # 3. Collect unique valid emails
+        recipient_emails = list(set(
+            reg.student.email
+            for reg in registrations
+            if reg.student and reg.student.email
+        ))
+
+        # 4. Create notifications (Stage them in the session)
         for reg in registrations:
             notification = Notification(
                 user_id=reg.student_id,
-                title=form.title.data,
-                message=f'[{event.title}] {form.message.data}'
+                title=f"EVENT ALERT: {form.title.data}",
+                message=f"[{event.title}] {form.message.data}",
+                created_at=datetime.utcnow()
             )
             db.session.add(notification)
 
-        db.session.commit()
-        flash(f'Alert sent to {len(registrations)} registered volunteer(s).', 'success')
+        email_success_count = 0
+
+        # 5. Send email (Corrected Logic)
+        if recipient_emails:
+            # Use a clean string for the 'To' field
+            sender_email = current_app.config.get('MAIL_USERNAME', 'studentvolunteeringsystem@gmail.com')
+            
+            msg = Message(
+                subject=f"URGENT: {form.title.data} ({event.title})",
+                recipients=[sender_email], 
+                bcc=recipient_emails,
+                body=f"Hello Volunteer,\n\n"
+                     f"Supervisor {session.get('full_name', 'Admin')} has posted an update for \"{event.title}\":\n\n"
+                     f"{form.message.data}\n\n"
+                     f"Please check your student dashboard for more details.\n\n"
+                     f"Sent via DUT Volunteer System"
+            )
+
+            try:
+                mail.send(msg)
+                email_success_count = len(recipient_emails)
+            except Exception as e:
+                # This will now log the specific Gmail error to your console
+                logging.error(f"SMTP Error: {e}")
+                flash("Alert posted to dashboards, but email delivery failed. Check terminal for error.", "warning")
+
+        # 6. Commit all DB changes
+        try:
+            db.session.commit()
+        except Exception as db_error:
+            db.session.rollback()
+            logging.error(f"Database Error: {db_error}")
+            flash("Something went wrong while saving notifications.", "danger")
+            return redirect(url_for('supervisor_dashboard'))
+
+        # 7. Success message
+        success_msg = f'Alert posted to {len(registrations)} student dashboards'
+        if email_success_count > 0:
+            success_msg += f' and {email_success_count} emails sent.'
+
+        flash(success_msg, 'success')
         return redirect(url_for('supervisor_dashboard'))
 
     return render_template('send_alert.html', form=form, event=event)

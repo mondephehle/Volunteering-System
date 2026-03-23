@@ -271,7 +271,12 @@
             </div>
           </div>
           <!-- Send Alert button opens modal -->
-          <button class="notify-btn" onclick="openNotify({{ event.id }}, '{{ event.title | replace("'", "\\'") }}')">
+          <button 
+            type="button"
+            class="notify-btn" 
+            data-event-id="{{ event.id }}"
+            data-event-name="{{ event.title }}"
+            onclick="openNotify(this)">
             🔔 Send Alert to Volunteers
           </button>
         </div>
@@ -401,18 +406,50 @@
 </div>
 
 <script>
-  function openNotify(eventId, eventName) {
-    document.getElementById('notify-event-name').textContent = eventName;
-    document.getElementById('notify-form').action = `/supervisor/events/${eventId}/alerts`;
-    document.getElementById('notify-modal').classList.add('open');
+  function openNotify(buttonElement) {
+    // 1. Get the actual ID and Name from the button's data attributes
+    var eventId = buttonElement.getAttribute('data-event-id');
+    var eventName = buttonElement.getAttribute('data-event-name');
+    
+    // 2. Update the Name in the modal
+    var nameSpan = document.getElementById('notify-event-name');
+    if (nameSpan) {
+      nameSpan.textContent = eventName;
+    }
+    
+    // 3. Update the Form Action (Constructing the string correctly)
+    var form = document.getElementById('notify-form');
+    if (form) {
+      // This builds: /supervisor/events/5/send_alert
+      form.action = '/supervisor/events/' + eventId + '/send_alert';
+    }
+    
+    // 4. Open the modal
+    var modal = document.getElementById('notify-modal');
+    if (modal) {
+      modal.classList.add('open');
+    }
   }
+
   function closeNotify() {
-    document.getElementById('notify-modal').classList.remove('open');
+    var modal = document.getElementById('notify-modal');
+    if (modal) {
+      modal.classList.remove('open');
+    }
   }
-  document.getElementById('notify-modal').addEventListener('click', function(e) {
-    if (e.target === this) closeNotify();
+
+  // Handle closing modal when clicking outside of it
+  document.addEventListener('click', function(e) {
+    var modal = document.getElementById('notify-modal');
+    if (e.target === modal) {
+      closeNotify();
+    }
   });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeNotify(); });
+
+  // Handle Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeNotify();
+  });
 </script>
 
 {% endblock %}

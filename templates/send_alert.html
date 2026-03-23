@@ -14,7 +14,7 @@
             </div>
         </div>
 
-        <form method="POST">
+        <form action="{{ url_for('send_alert', event_id=event.id) }}" method="POST">
             {{ form.hidden_tag() }}
 
             <div class="mb-3">
