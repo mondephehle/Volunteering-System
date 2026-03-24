@@ -271,14 +271,19 @@ def home():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegisterForm()
-    if form.validate_on_submit():
     
+    # 1. This triggers the validate_email logic in forms.py
+    if form.validate_on_submit():
         email_input = form.email.data.strip().lower()
+        
+        # 2. Check for duplicate users
         existing_user = User.query.filter(db.func.lower(User.email) == email_input).first()
         if existing_user:
             flash('An account with that email already exists.', 'danger')
-            return redirect(url_for('register'))
+            # CRITICAL FIX: Use render_template, NOT redirect
+            return render_template('student_register.html', form=form)
 
+        # 3. Create the user if validation passes
         user = User(
             full_name=form.full_name.data.strip(),
             email=email_input,
@@ -291,7 +296,10 @@ def register():
 
         flash('Account created successfully. Please log in.', 'success')
         return redirect(url_for('login'))
-    return render_template('register.html', form=form)
+
+    # 4. If form.validate_on_submit() is False, it comes here.
+    # This happens when your Gmail/Outlook/DUT validation fails.
+    return render_template('student_register.html', form=form)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
