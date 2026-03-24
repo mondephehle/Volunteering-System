@@ -394,7 +394,7 @@ def create_app():
         flash('Certificate issued successfully.', 'success')
         return redirect(url_for('admin_dashboard'))
 
-    @app.route('/admin/notify', methods=['GET', 'POST'])
+@app.route('/admin/notify', methods=['GET', 'POST'])
     @admin_required
     def admin_notify():
         form = AlertForm()
@@ -414,6 +414,110 @@ def create_app():
             return redirect(url_for('admin_dashboard'))
 
         return render_template('admin_notify.html', form=form)
+
+    # ── Verify Attendance ──────────────────────────────────────────────────────
+    @app.route('/events/<int:event_id>/verify', methods=['GET', 'POST'])
+    @student_required
+    def verify_attendance(event_id):
+        event = Event.query.get_or_404(event_id)
+        form = VerifyAttendanceForm()
+
+        registration = Registration.query.filter_by(
+            student_id=session['user_id'], event_id=event_id
+        ).first()
+
+        if not registration:
+            flash('You are not registered for this event.', 'danger')
+            return redirect(url_for('student_dashboard'))
+
+        if registration.attendance_verified:
+            flash('Your attendance has already been verified.', 'info')
+            return redirect(url_for('student_dashboard'))
+
+        if form.validate_on_submit():
+            entered_code = form.verification_code.data.strip().upper()
+            if not event.verification_code or entered_code != event.verification_code.upper():
+                flash('Invalid verification code. Please check with your supervisor.', 'danger')
+                return render_template('verify_attendance.html', form=form, event=event)
+
+            registration.attendance_verified = True
+            registration.verified_at = datetime.utcnow()
+
+            existing_log = HourLog.query.filter_by(
+                student_id=session['user_id'], event_id=event_id
+            ).first()
+
+            if existing_log:
+                existing_log.hours = form.hours.data
+                existing_log.description = form.description.data
+                existing_log.status = 'verified'
+                existing_log.verified_by_code = True
+                existing_log.reviewed_at = datetime.utcnow()
+            else:
+                new_log = HourLog(
+                    student_id=session['user_id'],
+                    event_id=event_id,
+                    hours=form.hours.data,
+                    description=form.description.data,
+                    status='verified',
+                    verified_by_code=True,
+                    reviewed_at=datetime.utcnow()
+                )
+                db.session.add(new_log)
+
+            db.session.commit()
+            flash(f'Attendance verified! {form.hours.data} hours logged.', 'success')
+            return redirect(url_for('student_dashboard'))
+
+        return render_template('verify_attendance.html', form=form, event=event)
+
+    # ── Submit Review ──────────────────────────────────────────────────────────
+    @app.route('/events/<int:event_id>/review', methods=['GET', 'POST'])
+    @student_required
+    def submit_review(event_id):
+        event = Event.query.get_or_404(event_id)
+
+        hour_log = HourLog.query.filter(
+            HourLog.student_id == session['user_id'],
+            HourLog.event_id == event_id,
+            HourLog.status.in_(['approved', 'verified'])
+        ).first()
+
+        if not hour_log:
+            flash('You can only review events where your hours have been approved.', 'warning')
+            return redirect(url_for('student_dashboard'))
+
+        existing_review = Review.query.filter_by(
+            student_id=session['user_id'], event_id=event_id
+        ).first()
+
+        if existing_review:
+            flash('You have already reviewed this event.', 'info')
+            return redirect(url_for('event_reviews', event_id=event_id))
+
+        form = ReviewForm()
+        if form.validate_on_submit():
+            review = Review(
+                student_id=session['user_id'],
+                event_id=event_id,
+                rating=int(form.rating.data),
+                body=form.body.data
+            )
+            db.session.add(review)
+            db.session.commit()
+            flash('Thank you for your review!', 'success')
+            return redirect(url_for('event_reviews', event_id=event_id))
+
+        return render_template('submit_reviews.html', form=form, event=event)
+
+    # ── Event Reviews (public) ─────────────────────────────────────────────────
+    @app.route('/events/<int:event_id>/reviews')
+    def event_reviews(event_id):
+        event = Event.query.get_or_404(event_id)
+        reviews = Review.query.filter_by(event_id=event_id)\
+                              .order_by(Review.created_at.desc()).all()
+        avg_rating = round(sum(r.rating for r in reviews) / len(reviews), 1) if reviews else None
+        return render_template('event_reviews.html', event=event, reviews=reviews, avg_rating=avg_rating)
 
     with app.app_context():
         db.create_all()

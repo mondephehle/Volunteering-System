@@ -1,21 +1,29 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timezone
 from werkzeug.security import generate_password_hash, check_password_hash
+import random
+import string
 
 db = SQLAlchemy()
 
 
+def generate_verification_code():
+    """Generate a random 6-character alphanumeric verification code."""
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+
+
 class User(db.Model):
-    __tablename__ = "user"
+    __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
-    full_name = db.Column(db.String(100), nullable=False)
-    student_number = db.Column(db.String(20), unique=True, nullable=True)
+    full_name = db.Column(db.String(120), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
-    role = db.Column(db.String(20), default="student")  # student / supervisor / admin
+    role = db.Column(db.String(20), nullable=False, default='student')  # student / supervisor / admin
     department = db.Column(db.String(100), nullable=True)
-    created_at = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    supervised_events = db.relationship('Event', backref='supervisor', lazy=True, foreign_keys='Event.supervisor_id')
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -25,95 +33,118 @@ class User(db.Model):
 
 
 class Event(db.Model):
-    __tablename__ = "event"
+    __tablename__ = 'events'
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(150), nullable=False)
     description = db.Column(db.Text, nullable=True)
-    date = db.Column(db.DateTime(timezone=True), nullable=False)
-    end_time = db.Column(db.String(10))
+    date = db.Column(db.DateTime, nullable=True)
     location = db.Column(db.String(200), nullable=True)
-    max_participants = db.Column(db.Integer, nullable=True)
+    max_participants = db.Column(db.Integer, default=0)
     category = db.Column(db.String(100), nullable=True)
-    status = db.Column(db.String(20), default="open")  # open / closed / archived
-    total_event_hours = db.Column(db.Float, nullable=False, default=0.0)
-    supervisor_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
-    created_at = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    status = db.Column(db.String(20), default='open')  # open / closed / archived
+    supervisor_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     image_filename = db.Column(db.String(200))
-    supervisor = db.relationship("User", foreign_keys=[supervisor_id], backref="supervised_events")
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # --- NEW: Verification code for attendance ---
+    # Supervisors share this code at the event. Volunteers enter it to verify attendance.
+    verification_code = db.Column(db.String(10), nullable=True, default=generate_verification_code)
+
+    registrations = db.relationship('Registration', backref='event', lazy=True, cascade='all, delete-orphan')
+    hour_logs = db.relationship('HourLog', backref='event', lazy=True, cascade='all, delete-orphan')
+    reviews = db.relationship('Review', backref='event', lazy=True, cascade='all, delete-orphan')
 
 
 class Registration(db.Model):
-    __tablename__ = "registration"
+    __tablename__ = 'registrations'
 
     id = db.Column(db.Integer, primary_key=True)
-    student_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    event_id = db.Column(db.Integer, db.ForeignKey("event.id"), nullable=False)
-    registered_at = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
-    attendance_status = db.Column(db.String(20), default="registered")
+    student_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    event_id = db.Column(db.Integer, db.ForeignKey('events.id'), nullable=False)
+    registration_date = db.Column(db.DateTime, default=datetime.utcnow)
 
-    student = db.relationship("User", foreign_keys=[student_id], backref="registrations")
-    event = db.relationship("Event", backref="registrations")
+    # --- NEW: Track if attendance has been verified via code ---
+    attendance_verified = db.Column(db.Boolean, default=False)
+    verified_at = db.Column(db.DateTime, nullable=True)
+
+    student = db.relationship('User', backref='registrations', foreign_keys=[student_id])
 
     __table_args__ = (
-        db.UniqueConstraint("student_id", "event_id", name="uq_registration_student_event"),
+        db.UniqueConstraint('student_id', 'event_id', name='unique_student_event_registration'),
     )
 
 
 class HourLog(db.Model):
-    __tablename__ = "hour_log"
+    __tablename__ = 'hour_logs'
 
     id = db.Column(db.Integer, primary_key=True)
-    student_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    event_id = db.Column(db.Integer, db.ForeignKey("event.id"), nullable=False)
+    student_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    event_id = db.Column(db.Integer, db.ForeignKey('events.id'), nullable=False)
     hours = db.Column(db.Float, nullable=False)
     description = db.Column(db.Text, nullable=True)
-    status = db.Column(db.String(20), default="pending")  # pending / approved / rejected
-    comment = db.Column(db.Text, nullable=True)
-    reviewed_by = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
-    reviewed_at = db.Column(db.DateTime(timezone=True), nullable=True)
-    submitted_at = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    submission_date = db.Column(db.DateTime, default=datetime.utcnow)
 
-    student = db.relationship("User", foreign_keys=[student_id], backref="hour_logs")
-    reviewer = db.relationship("User", foreign_keys=[reviewed_by])
-    event = db.relationship("Event", backref="hour_logs")
+    status = db.Column(db.String(20), default='pending')  # pending / approved / rejected / verified
+    supervisor_comment = db.Column(db.Text, nullable=True)
+    reviewed_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    reviewed_at = db.Column(db.DateTime, nullable=True)
+
+    # --- NEW: Was this log submitted via verification code? ---
+    # Logs submitted with a valid code are auto-approved; no manual review needed.
+    verified_by_code = db.Column(db.Boolean, default=False)
+
+    student = db.relationship('User', foreign_keys=[student_id], backref='hour_logs')
+    reviewer = db.relationship('User', foreign_keys=[reviewed_by])
 
     __table_args__ = (
-        db.UniqueConstraint("student_id", "event_id", name="uq_hourlog_student_event"),
+        db.UniqueConstraint('student_id', 'event_id', name='unique_student_event_hourlog'),
+    )
+
+
+class Review(db.Model):
+    """
+    A volunteer's review of an event they participated in.
+    Only students with an approved or verified HourLog for the event can submit a review.
+    One review per student per event.
+    """
+    __tablename__ = 'reviews'
+
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    event_id = db.Column(db.Integer, db.ForeignKey('events.id'), nullable=False)
+
+    rating = db.Column(db.Integer, nullable=False)        # 1–5 stars
+    body = db.Column(db.Text, nullable=False)             # Written review text
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    student = db.relationship('User', backref='reviews', foreign_keys=[student_id])
+
+    __table_args__ = (
+        db.UniqueConstraint('student_id', 'event_id', name='unique_student_event_review'),
     )
 
 
 class Certificate(db.Model):
-    __tablename__ = "certificate"
+    __tablename__ = 'certificates'
 
     id = db.Column(db.Integer, primary_key=True)
-    student_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    event_id = db.Column(db.Integer, db.ForeignKey("event.id"), nullable=False)
-    approved_hours = db.Column(db.Float, nullable=False, default=0.0)
-    total_event_hours = db.Column(db.Float, nullable=False, default=0.0)
-    level = db.Column(db.String(20), nullable=False)  # Gold / Silver / Bronze
-    issued_at = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
-    issued_by = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
-    file_path = db.Column(db.String(255), nullable=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    total_hours = db.Column(db.Float, default=0)
+    issued_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    student = db.relationship("User", foreign_keys=[student_id], backref="certificates")
-    issuer = db.relationship("User", foreign_keys=[issued_by])
-    event = db.relationship("Event", backref="certificates")
-
-    __table_args__ = (
-        db.UniqueConstraint("student_id", "event_id", name="uq_certificate_student_event"),
-    )
+    student = db.relationship('User', backref='certificates')
 
 
 class Notification(db.Model):
-    __tablename__ = "notification"
+    __tablename__ = 'notifications'
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    title = db.Column(db.String(150), nullable=False, default="Notification")
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    title = db.Column(db.String(150), nullable=False)
     message = db.Column(db.Text, nullable=False)
     is_read = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     user = db.relationship("User", backref="notifications")
 
@@ -132,3 +163,4 @@ class Consent(db.Model):
     agreed_at = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     
     user = db.relationship("User", backref="consent")
+    user = db.relationship('User', backref='notifications')

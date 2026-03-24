@@ -1,0 +1,43 @@
+{# templates/submit_review.html #}
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4" style="max-width: 560px;">
+  <h2 class="mb-1">Write a Review</h2>
+  <p class="text-muted mb-4">
+    Sharing your experience for <strong>{{ event.title }}</strong> helps supervisors
+    and future volunteers.
+  </p>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <form method="POST" novalidate>
+        {{ form.hidden_tag() }}
+
+        {# --- Star rating --- #}
+        <div class="mb-3">
+          {{ form.rating.label(class="form-label fw-semibold") }}
+          {{ form.rating(class="form-select" + (' is-invalid' if form.rating.errors else '')) }}
+          {% for error in form.rating.errors %}
+            <div class="invalid-feedback">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        {# --- Review body --- #}
+        <div class="mb-4">
+          {{ form.body.label(class="form-label fw-semibold") }}
+          {{ form.body(class="form-control" + (' is-invalid' if form.body.errors else ''),
+              rows=5) }}
+          {% for error in form.body.errors %}
+            <div class="invalid-feedback">{{ error }}</div>
+          {% endfor %}
+          <small class="text-muted">10–1000 characters</small>
+        </div>
+
+        {{ form.submit(class="btn btn-primary w-100") }}
+      </form>
+    </div>
+  </div>
+
+  <a href="{{ url_for('student_events') }}" class="btn btn-link mt-3">← Back to Events</a>
+</div>
+{% endblock %}

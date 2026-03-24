@@ -279,6 +279,19 @@
             onclick="openNotify(this)">
             🔔 Send Alert to Volunteers
           </button>
+
+          <!-- Verification Code -->
+          <div style="margin-top:10px;background:var(--blue-soft);border:1px solid #c3d9f7;border-radius:10px;padding:12px 16px;">
+            <div style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--blue);margin-bottom:4px;">
+              🔑 Event Verification Code
+            </div>
+            <div style="font-family:monospace;font-size:26px;font-weight:700;letter-spacing:6px;color:var(--blue);">
+              {{ event.verification_code }}
+            </div>
+            <div style="font-size:11.5px;color:var(--ink-light);margin-top:4px;">
+              Share this code with volunteers at the event to verify their attendance
+            </div>
+          </div>
         </div>
         {% endfor %}
       {% else %}

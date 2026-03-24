@@ -1,0 +1,66 @@
+{# templates/event_reviews.html #}
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4" style="max-width: 700px;">
+
+  <div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+      <h2 class="mb-0">Reviews — {{ event.title }}</h2>
+      {% if avg_rating %}
+        <p class="text-muted mb-0">
+          Average rating:
+          <strong>{{ avg_rating }} / 5</strong>
+          &nbsp;({{ reviews|length }} review{{ 's' if reviews|length != 1 }})
+        </p>
+      {% else %}
+        <p class="text-muted mb-0">No reviews yet.</p>
+      {% endif %}
+    </div>
+
+    {# Show "Write a Review" button only for logged-in students #}
+    {% if session.get('user_id') and session.get('role') == 'student' %}
+      <a href="{{ url_for('submit_review', event_id=event.id) }}"
+         class="btn btn-primary btn-sm">
+        ✏️ Write a Review
+      </a>
+    {% endif %}
+  </div>
+
+  <hr>
+
+  {% if reviews %}
+    {% for review in reviews %}
+      <div class="card mb-3 shadow-sm">
+        <div class="card-body">
+
+          {# Star display #}
+          <div class="mb-1">
+            {% for i in range(1, 6) %}
+              {% if i <= review.rating %}
+                <span style="color: #f5a623; font-size: 1.1rem;">★</span>
+              {% else %}
+                <span style="color: #ccc; font-size: 1.1rem;">★</span>
+              {% endif %}
+            {% endfor %}
+            <span class="ms-1 text-muted small">{{ review.rating }}/5</span>
+          </div>
+
+          <p class="mb-2">{{ review.body }}</p>
+
+          <small class="text-muted">
+            — {{ review.student.full_name }} &nbsp;·&nbsp;
+            {{ review.created_at.strftime('%d %b %Y') }}
+          </small>
+
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="alert alert-light text-center">
+      No reviews have been submitted for this event yet.
+    </div>
+  {% endif %}
+
+  <a href="{{ url_for('student_events') }}" class="btn btn-link mt-3">← Back to Events</a>
+</div>
+{% endblock %}
