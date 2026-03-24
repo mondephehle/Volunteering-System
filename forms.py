@@ -4,14 +4,23 @@ from wtforms.validators import DataRequired, Length, NumberRange, Optional, Emai
 from flask_wtf.file import FileField, FileAllowed
 
 
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, SubmitField, SelectField
+from wtforms.validators import DataRequired, Email, Length, EqualTo, ValidationError
+from email_validator import validate_email, EmailNotValidError
+
 class RegisterForm(FlaskForm):
     full_name = StringField('Full Name', validators=[DataRequired(), Length(min=2, max=120)])
+    
+    # Standard email format validation
     email = StringField('Email', validators=[DataRequired(), Email(), Length(max=120)])
+    
     role = SelectField(
         'Role',
         choices=[('student', 'Student'), ('supervisor', 'Supervisor'), ('admin', 'Admin')],
         validators=[DataRequired()]
     )
+    
     password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
     
@@ -42,6 +51,37 @@ class RegisterForm(FlaskForm):
     )
     
     submit = SubmitField('Create Account')
+
+    def validate_email(self, field):
+        """
+        Custom validator to enforce Gmail, Outlook, and DUT domains 
+        while checking if the email actually exists.
+        """
+        email_addr = field.data.lower().strip()
+        
+        # 1. Define the authorized domains for the DUT project
+        allowed_domains = [
+            'gmail.com', 
+            'outlook.com', 
+            'hotmail.com', 
+            'live.com', 
+            'outlook.co.za',
+            'dut4life.ac.za'
+        ]
+        
+        # Extract the domain from the email string
+        domain = email_addr.split('@')[-1]
+        
+        # 2. Domain Restriction Check
+        if domain not in allowed_domains:
+            raise ValidationError('Registration is restricted to Gmail, Outlook, or @dut4life.ac.za accounts.')
+
+        # 3. Deliverability Check
+        # This verifies the domain has valid MX records to receive mail
+        try:
+            validate_email(email_addr, check_deliverability=True)
+        except EmailNotValidError:
+            raise ValidationError('This email address is not active or cannot receive mail.')
 
 
 class LoginForm(FlaskForm):
