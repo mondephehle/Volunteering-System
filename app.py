@@ -34,8 +34,8 @@ app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USE_SSL'] = True   # MUST be True for 465
 app.config['MAIL_USE_TLS'] = False  # MUST be False for 465
-app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME') 
-app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+app.config['MAIL_USERNAME'] = 'studentvolunteeringsystem@gmail.com'
+app.config['MAIL_PASSWORD'] = 'ieilvmgpajhocate'
 app.config['MAIL_DEFAULT_SENDER'] = 'studentvolunteeringsystem@gmail.com'
 
 
@@ -794,96 +794,76 @@ from datetime import datetime
 
 @app.route('/supervisor/events/<int:event_id>/send_alert', methods=['GET', 'POST'])
 @supervisor_required
-def send_alert(event_id):
-    event = Event.query.get_or_404(event_id)
+def send_alert(event_id): # Renamed to match dashboard expectations
     form = AlertForm()
-
+    event = Event.query.get_or_404(event_id)
+    
+    # Security: Ensure this supervisor owns this event
     if event.supervisor_id != session.get('user_id'):
-        flash('Unauthorized: You can only send alerts for events you manage.', 'danger')
-        return redirect(url_for('supervisor_dashboard'))  # ← add return
-
-    return redirect(url_for('send_event_alert', event_id=event_id))
-
-@app.route('/supervisor/events/<int:event_id>/alerts', methods=['GET', 'POST'])
-@supervisor_required
-def send_event_alert(event_id):
-    form = AlertForm()
-    event = Event.query.get_or_404(event_id)
-    if event.supervisor_id != session['user_id']:
-        flash('You are not allowed to send alerts for this event.', 'danger')
+        flash('Unauthorized: You can only send alerts for events you supervise.', 'danger')
         return redirect(url_for('supervisor_dashboard'))
+
     if form.validate_on_submit():
-        # 2. Optimized query
-        registrations = Registration.query.options(
-            joinedload(Registration.student)
-        ).filter_by(event_id=event.id).all()
+        # 1. Fetch registrations with student data
+        registrations = Registration.query.filter_by(event_id=event.id).all()
 
         if not registrations:
-            flash('No students are currently registered for this event.', 'warning')
+            flash('Broadcast failed: No volunteers are registered for this event yet.', 'warning')
             return redirect(url_for('supervisor_dashboard'))
 
-        # 3. Collect unique valid emails
-        recipient_emails = list(set(
-            reg.student.email
-            for reg in registrations
-            if reg.student and reg.student.email
-        ))
-
-        # 4. Create notifications (Stage them in the session)
-        registrations = Registration.query.filter_by(event_id=event.id).all()
+        # 2. Collect unique valid emails and create notifications
+        recipient_emails = []
         for reg in registrations:
-            notification = Notification(
+            if reg.student and reg.student.email:
+                recipient_emails.append(reg.student.email)
+            
+            # Create in-app notification
+            new_notif = Notification(
                 user_id=reg.student_id,
                 title=f"EVENT ALERT: {form.title.data}",
                 message=f"[{event.title}] {form.message.data}",
                 created_at=datetime.utcnow()
             )
-            db.session.add(notification)
+            db.session.add(new_notif)
 
-        email_success_count = 0
+        recipient_emails = list(set(recipient_emails)) # Unique emails only
+        email_sent = False
 
-        # 5. Send email (Corrected Logic)
+        # 3. Send Email via SMTP
         if recipient_emails:
-            # Use a clean string for the 'To' field
-            sender_email = current_app.config.get('MAIL_USERNAME', 'studentvolunteeringsystem@gmail.com')
-            
+            sender_email = current_app.config.get('MAIL_USERNAME')
             msg = Message(
                 subject=f"URGENT: {form.title.data} ({event.title})",
-                recipients=[sender_email], 
-                bcc=recipient_emails,
+                recipients=[sender_email], # Protect privacy by sending to yourself
+                bcc=recipient_emails,      # Use BCC for student privacy
                 body=f"Hello Volunteer,\n\n"
                      f"Supervisor {session.get('full_name', 'Admin')} has posted an update for \"{event.title}\":\n\n"
                      f"{form.message.data}\n\n"
-                     f"Please check your student dashboard for more details.\n\n"
-                     f"Sent via DUT Volunteer System"
+                     f"Please check your student dashboard for details.\n\n"
+                     f"Regards,\nDUT Volunteering System"
             )
 
             try:
                 mail.send(msg)
-                email_success_count = len(recipient_emails)
+                email_sent = True
             except Exception as e:
-                # This will now log the specific Gmail error to your console
                 logging.error(f"SMTP Error: {e}")
-                flash("Alert posted to dashboards, but email delivery failed. Check terminal for error.", "warning")
+                # We don't return early; we still want the in-app notifications to save
 
-        # 6. Commit all DB changes
+        # 4. Final Database Commit
         try:
             db.session.commit()
-        except Exception as db_error:
+            if email_sent:
+                flash(f'Success! Alert sent to {len(recipient_emails)} volunteers via Email & Dashboard.', 'success')
+            else:
+                flash(f'Alert posted to {len(registrations)} dashboards, but email delivery failed.', 'warning')
+        except Exception as e:
             db.session.rollback()
-            logging.error(f"Database Error: {db_error}")
-            flash("Something went wrong while saving notifications.", "danger")
-            return redirect(url_for('supervisor_dashboard'))
+            logging.error(f"DB Error: {e}")
+            flash('Failed to save notifications to the database.', 'danger')
 
-        # 7. Success message
-        success_msg = f'Alert posted to {len(registrations)} student dashboards'
-        if email_success_count > 0:
-            success_msg += f' and {email_success_count} emails sent.'
-
-        flash(success_msg, 'success')
-        db.session.commit()
-        flash(f'Alert sent to {len(registrations)} registered volunteer(s).', 'success')
         return redirect(url_for('supervisor_dashboard'))
+
     return render_template('send_alert.html', form=form, event=event)
 
 

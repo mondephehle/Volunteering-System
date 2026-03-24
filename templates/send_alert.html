@@ -1,34 +1,108 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <h2 class="mb-4">Send Alert</h2>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
 
-        <div class="card mb-3">
-            <div class="card-body">
-                <p><strong>Event:</strong> {{ event.title }}</p>
-                <p><strong>Location:</strong> {{ event.location }}</p>
-                <p><strong>Date:</strong> {{ event.date.strftime('%d %b %Y %H:%M') if event.date else 'N/A' }}</p>
-                <p><strong>Supervisor:</strong> {{ event.supervisor.full_name if event.supervisor else 'Not assigned' }}</p>
+  .alert-container {
+    max-width: 650px;
+    margin: 40px auto;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .page-title { font-family: 'DM Serif Display', serif; font-size: 28px; color: #1a1a2e; margin-bottom: 20px; }
+  
+  .event-preview-card {
+    background: #fff;
+    border: 1px solid #e8e8f0;
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 20px rgba(26,26,46,0.05);
+  }
+  
+  .preview-label { font-size: 11px; font-weight: 600; text-transform: uppercase; color: #7b7b9a; letter-spacing: 0.05em; margin-bottom: 4px; }
+  .preview-value { font-size: 15px; color: #1a1a2e; margin-bottom: 12px; font-weight: 500; }
+  
+  .form-panel {
+    background: #ffffff;
+    border: 1px solid #e8e8f0;
+    border-radius: 14px;
+    padding: 30px;
+    box-shadow: 0 12px 40px rgba(26,26,46,0.08);
+  }
+
+  .form-label { font-weight: 600; font-size: 13px; color: #3d3d5c; margin-bottom: 8px; display: block; }
+  .form-control {
+    border-radius: 10px;
+    border: 1.5px solid #e8e8f0;
+    padding: 12px 16px;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+  }
+  .form-control:focus {
+    border-color: #b45309;
+    box-shadow: 0 0 0 4px rgba(180, 83, 9, 0.1);
+    outline: none;
+  }
+
+  .btn-group-dut { display: flex; gap: 12px; margin-top: 24px; }
+  .btn-dut { 
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 12px 24px; border-radius: 10px; font-weight: 600; border: none; cursor: pointer;
+    transition: all 0.2s; text-decoration: none; font-size: 14px;
+  }
+  .btn-send { background: #b45309; color: white; flex: 2; }
+  .btn-send:hover { background: #92400e; transform: translateY(-1px); }
+  .btn-back { background: #f7f7fb; color: #7b7b9a; border: 1px solid #e8e8f0; flex: 1; }
+  .btn-back:hover { background: #e8e8f0; color: #1a1a2e; }
+</style>
+
+<div class="alert-container">
+    <h2 class="page-title">Send Event Alert</h2>
+
+    <div class="event-preview-card">
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="preview-label">Selected Event</div>
+                <div class="preview-value">{{ event.title }}</div>
+            </div>
+            <div class="col-sm-6">
+                <div class="preview-label">Location</div>
+                <div class="preview-value">📍 {{ event.location or 'Not Set' }}</div>
             </div>
         </div>
+        <div class="preview-label">Target Audience</div>
+        <div class="preview-value" style="color: #1565c0;">
+            👥 All registered volunteers for this event
+        </div>
+    </div>
 
-        <form action="{{ url_for('send_alert', event_id=event.id) }}" method="POST">
+    <div class="form-panel">
+        <form method="POST">
             {{ form.hidden_tag() }}
 
-            <div class="mb-3">
-                {{ form.title.label(class="form-label") }}
-                {{ form.title(class="form-control") }}
+            <div class="mb-4">
+                <label class="form-label">Alert Subject</label>
+                {{ form.title(class="form-control", placeholder="e.g. Venue Change or Time Update") }}
             </div>
 
             <div class="mb-3">
-                {{ form.message.label(class="form-label") }}
-                {{ form.message(class="form-control", rows="5") }}
+                <label class="form-label">Detailed Message</label>
+                {{ form.message(class="form-control", rows="5", placeholder="Provide clear instructions for the volunteers...") }}
             </div>
+            
+            <p style="font-size: 12px; color: #7b7b9a;">
+                💡 This alert will appear on student dashboards and be sent via email.
+            </p>
 
-            {{ form.submit(class="btn btn-warning") }}
-            <a href="{{ url_for('supervisor_dashboard') }}" class="btn btn-secondary">Back</a>
+            <div class="btn-group-dut">
+                <button type="submit" class="btn-dut btn-send">
+                    🔔 Broadcast Alert
+                </button>
+                <a href="{{ url_for('supervisor_dashboard') }}" class="btn-dut btn-back">
+                    Cancel
+                </a>
+            </div>
         </form>
     </div>
 </div>
