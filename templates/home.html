@@ -1,69 +1,68 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="p-5 mb-5 bg-dark text-white rounded-4 shadow-lg">
+<div class="p-5 mb-5 bg-dark text-white rounded-4 shadow-lg overflow-hidden">
     <div class="container-fluid py-5 text-center">
-        <h1 class="display-4 fw-bold">Empowering Change through Community Service</h1>
-        <p class="fs-4 mx-auto mb-4" style="max-width: 800px;">
+        <h1 class="display-4 fw-bold mb-3">Empowering Change through Community Service</h1>
+        <p class="fs-5 mx-auto mb-5 text-light" style="max-width: 750px; opacity: 0.9;">
             A centralized platform for students to discover volunteer opportunities, 
-            track their impact, and earn recognized certification for their contributions.
+            track impact, and earn recognized certification for their contributions.
         </p>
-        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-            <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg px-4 gap-3">Get Started</a>
-            <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg px-4">Student Login</a>
+        <div class="d-grid gap-3 d-sm-flex justify-content-sm-center mb-2">
+            <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg px-5 rounded-pill shadow">Get Started</a>
+            <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg px-5 rounded-pill">Member Login</a>
         </div>
-        <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg me-2">Create Account</a>
-        <a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-lg">Login</a>
-        <a href="{{ url_for('login') }}" class="text-primary">Forgot password?</a>
     </div>
 </div>
 
-<div class="row g-4 py-5 row-cols-1 row-cols-lg-3">
-    <div class="feature col text-center">
-        <div class="feature-icon d-inline-flex align-items-center justify-content-center bg-primary bg-gradient text-white fs-2 mb-3 rounded-circle" style="width: 80px; height: 80px;">
-            📅
+<div class="container px-4 py-5" id="featured-3">
+    <div class="row g-4 py-5 row-cols-1 row-cols-lg-3">
+        <div class="feature col text-center">
+            <div class="feature-icon d-inline-flex align-items-center justify-content-center bg-primary bg-gradient text-white fs-2 mb-4 rounded-circle shadow-sm" style="width: 70px; height: 70px;">
+                📅
+            </div>
+            <h3 class="fs-4 fw-bold">Easy Discovery</h3>
+            <p class="text-muted">Browse volunteer events by category, location, or date to find the perfect match for your skills.</p>
         </div>
-        <h3 class="fs-4 fw-semibold">Easy Discovery</h3>
-        <p>Browse a wide variety of community service events. Filter by category, location, or date to find the perfect match for your skills and interests.</p>
-    </div>
-    <div class="feature col text-center">
-        <div class="feature-icon d-inline-flex align-items-center justify-content-center bg-success bg-gradient text-white fs-2 mb-3 rounded-circle" style="width: 80px; height: 80px;">
-            ⏱️
+        <div class="feature col text-center">
+            <div class="feature-icon d-inline-flex align-items-center justify-content-center bg-success bg-gradient text-white fs-2 mb-4 rounded-circle shadow-sm" style="width: 70px; height: 70px;">
+                ⏱️
+            </div>
+            <h3 class="fs-4 fw-bold">Accurate Tracking</h3>
+            <p class="text-muted">Log your hours directly. Our digital logbook ensures work is verified by supervisors in real-time.</p>
         </div>
-        <h3 class="fs-4 fw-semibold">Accurate Tracking</h3>
-        <p>Log your hours directly through the platform. Our digital logbook ensures all your hard work is recorded and verified by supervisors in real-time.</p>
-    </div>
-    <div class="feature col text-center">
-        <div class="feature-icon d-inline-flex align-items-center justify-content-center bg-warning bg-gradient text-white fs-2 mb-3 rounded-circle" style="width: 80px; height: 80px;">
-            🎓
+        <div class="feature col text-center">
+            <div class="feature-icon d-inline-flex align-items-center justify-content-center bg-warning bg-gradient text-white fs-2 mb-4 rounded-circle shadow-sm" style="width: 70px; height: 70px;">
+                🎓
+            </div>
+            <h3 class="fs-4 fw-bold">Certificates</h3>
+            <p class="text-muted">Earn Bronze, Silver, or Gold certificates to boost your CV and build a verifiable portfolio.</p>
         </div>
-        <h3 class="fs-4 fw-semibold">Certificates</h3>
-        <p>Achieve milestones and earn Bronze, Silver, or Gold certificates. Build a verifiable portfolio of service to boost your CV and academic record.</p>
     </div>
 </div>
 
-<hr class="my-5">
+<hr class="my-5 opacity-25">
 
-<div class="row align-items-md-stretch mb-5">
+<div class="row align-items-md-stretch mb-5 g-4">
     <div class="col-md-6">
         <div class="h-100 p-5 text-bg-light border rounded-4 shadow-sm">
-            <h2>For Students</h2>
-            <p>Join a community of active volunteers. Register for events, receive emergency alerts from supervisors, and monitor your progress toward certification goals.</p>
-            <a href="{{ url_for('register') }}" class="btn btn-outline-primary">Join as Volunteer</a>
+            <h2 class="fw-bold">For Students</h2>
+            <p>Join a community of active volunteers. Register for events, receive emergency alerts, and monitor your progress toward certification goals.</p>
+            <a href="{{ url_for('register') }}" class="btn btn-outline-primary fw-semibold mt-3">Join as Volunteer</a>
         </div>
     </div>
     <div class="col-md-6">
         <div class="h-100 p-5 bg-white border rounded-4 shadow-sm">
-            <h2>For Supervisors</h2>
-            <p>Effortlessly manage your team. Post new opportunities, review submitted hours, and communicate directly with volunteers through platform-wide notifications.</p>
-            <a href="{{ url_for('login') }}" class="btn btn-outline-secondary">Staff Portal</a>
+            <h2 class="fw-bold">For Supervisors</h2>
+            <p>Effortlessly manage your team. Post new opportunities, review submitted hours, and communicate directly through platform-wide notifications.</p>
+            <a href="{{ url_for('login') }}" class="btn btn-outline-secondary fw-semibold mt-3">Staff Portal</a>
         </div>
     </div>
 </div>
 
-<div class="text-center mb-5">
+<div class="text-center py-5 border-top">
     <p class="text-muted">Having trouble accessing your account? 
-        <a href="{{ url_for('forgot_password') }}" class="text-decoration-none">Reset your password here</a>.
+        <a href="{{ url_for('forgot_password') }}" class="text-primary text-decoration-none fw-medium">Reset your password here</a>.
     </p>
 </div>
 {% endblock %}
