@@ -2,145 +2,147 @@
 
 {% block content %}
 <style>
-    .registration-form {
-        max-width: 700px;
-        margin: 0 auto;
-        padding: 20px;
+    :root {
+        --red: #CC0000;
+        --bg: #f7f7fb;
+        --border: #e8e8f0;
+        --ink: #1a1a2e;
     }
-    
+
+    .registration-card {
+        max-width: 750px;
+        background: #ffffff;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(26, 26, 46, 0.08);
+    }
+
     .consent-section {
-        background-color: #f8f9fa;
-        padding: 20px;
-        border-radius: 5px;
-        margin-top: 20px;
+        background-color: var(--bg);
+        padding: 25px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
     }
-    
+
     .form-check {
-        margin-bottom: 15px;
-        padding: 10px;
-        border-radius: 4px;
+        padding: 10px 10px 10px 35px;
+        border-radius: 8px;
+        transition: background-color 0.2s;
+        margin-bottom: 5px;
     }
-    
+
     .form-check:hover {
-        background-color: #e9ecef;
+        background-color: #fff0f0; /* Soft red tint on hover */
+    }
+
+    .form-check-input:checked {
+        background-color: var(--red);
+        border-color: var(--red);
+    }
+
+    .btn-dut-primary {
+        background-color: var(--red);
+        border: none;
+        padding: 12px;
+        font-weight: 600;
+        border-radius: 8px;
+        color: white;
+    }
+
+    .btn-dut-primary:hover {
+        background-color: #b30000;
+        color: white;
     }
 </style>
 
-<div class="row justify-content-center">
-    <div class="col-lg-8 col-md-10">
-        <h2 class="mb-4" id="reg-heading">Create Account</h2>
+<div class="container py-5 d-flex justify-content-center align-items-center" style="min-height: 85vh;">
+    <div class="registration-card p-4 p-md-5">
+        <div class="text-center mb-4">
+            <h2 class="fw-bold" style="color: var(--ink);">Create Account</h2>
+            <p class="text-muted">Join the Student Volunteer Community</p>
+        </div>
 
-        <form method="POST" id="registerForm" class="registration-form">
+        <form method="POST" id="registerForm" novalidate>
             {{ form.hidden_tag() }}
 
-            <div class="mb-3">
-                {{ form.full_name.label(class="form-label") }}
-                {{ form.full_name(class="form-control") }}
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    {{ form.full_name.label(class="form-label fw-semibold") }}
+                    {{ form.full_name(class="form-control", placeholder="John Doe") }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form.email.label(class="form-label fw-semibold") }}
+                    {{ form.email(class="form-control", placeholder="name@example.com") }}
+                </div>
             </div>
 
             <div class="mb-3">
-                {{ form.email.label(class="form-label") }}
-                {{ form.email(class="form-control") }}
-            </div>
-
-            <div class="mb-3">
-                {{ form.role.label(class="form-label") }}
+                {{ form.role.label(class="form-label fw-semibold") }}
                 {{ form.role(class="form-select", id="roleSelect") }}
             </div>
 
-            <div class="mb-3">
-                {{ form.password.label(class="form-label") }}
-                {{ form.password(class="form-control") }}
-            </div>
-
-            <div class="mb-3">
-                {{ form.confirm_password.label(class="form-label") }}
-                {{ form.confirm_password(class="form-control") }}
-            </div>
-
-            <!-- Consent Section (only for students) -->
-            <div id="consentSection" class="consent-section" style="display:none;">
-                <hr class="my-4">
-                <h5 class="mb-3">Consent & Agreements</h5>
-                <p class="text-muted"><small>As a student volunteer, please read and agree to all of the following before registering:</small></p>
-
-                <div class="mb-3">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="data_privacy" name="data_privacy" value="y" required>
-                        <label class="form-check-label" for="data_privacy">
-                            I agree to the Data Privacy Policy and consent to the use of my personal information for program administration
-                        </label>
-                    </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    {{ form.password.label(class="form-label fw-semibold") }}
+                    {{ form.password(class="form-control") }}
                 </div>
-
-                <div class="mb-3">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="liability_waiver" name="liability_waiver" value="y" required>
-                        <label class="form-check-label" for="liability_waiver">
-                            I acknowledge and agree to the Liability Waiver. I assume all risks and will not hold the organization responsible for injuries or damages
-                        </label>
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="photo_media_consent" name="photo_media_consent" value="y" required>
-                        <label class="form-check-label" for="photo_media_consent">
-                            I consent to having my photograph and/or video recorded during the program for promotional and educational purposes
-                        </label>
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="background_check" name="background_check" value="y" required>
-                        <label class="form-check-label" for="background_check">
-                            I consent to a background check as required by the organization
-                        </label>
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="event_participation" name="event_participation" value="y" required>
-                        <label class="form-check-label" for="event_participation">
-                            I understand and agree to comply with all event rules and instructions during my participation
-                        </label>
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="program_consent" name="program_consent" value="y" required>
-                        <label class="form-check-label" for="program_consent">
-                            I certify that I am at least 18 years old and have read and agree to all terms and conditions of the volunteer program
-                        </label>
-                    </div>
+                <div class="col-md-6 mb-3">
+                    {{ form.confirm_password.label(class="form-label fw-semibold") }}
+                    {{ form.confirm_password(class="form-control") }}
                 </div>
             </div>
 
-            {{ form.submit(class="btn btn-primary btn-lg") }}
+            <div id="consentSection" class="consent-section mt-4" style="display:none;">
+                <h5 class="mb-3 fw-bold">Consent & Agreements</h5>
+                <p class="text-muted small mb-3">Required for student volunteers:</p>
+
+                {% set checkboxes = [
+                    ('data_privacy', 'I agree to the Data Privacy Policy.'),
+                    ('liability_waiver', 'I agree to the Liability Waiver.'),
+                    ('photo_media_consent', 'I consent to photo/video recording.'),
+                    ('background_check', 'I consent to a background check.'),
+                    ('event_participation', 'I agree to comply with event rules.'),
+                    ('program_consent', 'I am 18+ and agree to all terms.')
+                ] %}
+
+                {% for id, label in checkboxes %}
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="{{ id }}" name="{{ id }}" value="y" required>
+                    <label class="form-check-label small" for="{{ id }}">
+                        {{ label }}
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="d-grid mt-4">
+                {{ form.submit(class="btn btn-dut-primary btn-lg shadow-sm") }}
+            </div>
+
+            <div class="text-center mt-4 pt-3 border-top">
+                <span class="text-muted small">Already have an account?</span>
+                <a href="{{ url_for('login') }}" class="small fw-bold text-decoration-none" style="color: var(--red);">Log in here</a>
+            </div>
         </form>
     </div>
 </div>
 
 <script>
-document.getElementById('roleSelect').addEventListener('change', function() {
-    const consentSection = document.getElementById('consentSection');
-    if (this.value === 'student') {
-        consentSection.style.display = 'block';
-    } else {
-        consentSection.style.display = 'none';
-    }
-});
-
-// Check initial state
-document.addEventListener('DOMContentLoaded', function() {
+function toggleConsent() {
     const roleSelect = document.getElementById('roleSelect');
     const consentSection = document.getElementById('consentSection');
+    const checkboxes = consentSection.querySelectorAll('input[type="checkbox"]');
+    
     if (roleSelect.value === 'student') {
         consentSection.style.display = 'block';
+        checkboxes.forEach(cb => cb.required = true);
+    } else {
+        consentSection.style.display = 'none';
+        checkboxes.forEach(cb => cb.required = false);
     }
-});
+}
+
+document.getElementById('roleSelect').addEventListener('change', toggleConsent);
+document.addEventListener('DOMContentLoaded', toggleConsent);
 </script>
 {% endblock %}

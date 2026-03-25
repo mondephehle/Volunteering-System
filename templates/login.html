@@ -1,48 +1,107 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="row">
-    <div class="">
-        <div class="card shadow-sm border-0" id="login-card">
-            <div class="card-body p-4" >
-                <h2 class="mb-4">Login</h2>
+<style>
+    :root {
+        --red: #CC0000;
+        --bg: #f7f7fb;
+        --border: #e8e8f0;
+        --ink: #1a1a2e;
+        --shadow: 0 4px 20px rgba(26, 26, 46, 0.08);
+    }
 
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                  {% if messages %}
-                    {% for category, message in messages %}
-                      <div class="alert alert-{{ 'danger' if category == 'error' else category }} mb-3">
-                        {{ message }}
-                      </div>
-                    {% endfor %}
-                  {% endif %}
-                {% endwith %}
+    .auth-container {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 
-                <form method="POST">
-                    {{ form.hidden_tag() }}
+    .login-card {
+        width: 100%;
+        max-width: 420px;
+        background: #ffffff;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+    }
 
-                    <div class="mb-3">
-                        {{ form.email.label(class="form-label") }}
-                        {{ form.email(class="form-control", placeholder="Enter your email") }}
-                        {% for error in form.email.errors %}
-                          <div class="text-danger small mt-1">{{ error }}</div>
-                        {% endfor %}
-                    </div>
+    .form-control {
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+    }
 
-                    <div class="mb-3">
-                        {{ form.password.label(class="form-label") }}
-                        {{ form.password(class="form-control", placeholder="Enter your password") }}
-                        {% for error in form.password.errors %}
-                          <div class="text-danger small mt-1">{{ error }}</div>
-                        {% endfor %}
-                        <!-- Forgot Password link -->
-                        <div class="text-end mt-1">
-                            <a href="{{ url_for('forgot_password') }}" class="small text-muted">Forgot your password?</a>
-                        </div>
-                    </div>
+    .form-control:focus {
+        border-color: var(--red);
+        box-shadow: 0 0 0 0.2rem rgba(204, 0, 0, 0.1);
+    }
 
-                    {{ form.submit(class="btn btn-primary") }}
-                </form>
+    .btn-dut-primary {
+        background-color: var(--red);
+        border: none;
+        padding: 12px;
+        font-weight: 600;
+        border-radius: 8px;
+        color: white;
+        transition: all 0.2s;
+    }
+
+    .btn-dut-primary:hover {
+        background-color: #b30000;
+        transform: translateY(-1px);
+        color: white;
+    }
+</style>
+
+<div class="auth-container">
+    <div class="login-card p-4 p-md-5">
+        <div class="text-center mb-4">
+            <h2 class="fw-bold" style="color: var(--ink);">Login</h2>
+            <p class="text-muted small">Volunteer Portal Access</p>
+        </div>
+
+        {# Flash Messages #}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ 'danger' if category == 'error' else category }} py-2 small mb-3">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form method="POST" novalidate>
+            {{ form.hidden_tag() }}
+
+            <div class="mb-3">
+                {{ form.email.label(class="form-label fw-semibold", style="font-size: 0.9rem;") }}
+                {{ form.email(class="form-control " + ("is-invalid" if form.email.errors else ""), placeholder="Enter your email") }}
+                {% for error in form.email.errors %}
+                  <div class="invalid-feedback">{{ error }}</div>
+                {% endfor %}
             </div>
+
+            <div class="mb-3">
+                <div class="d-flex justify-content-between">
+                    {{ form.password.label(class="form-label fw-semibold", style="font-size: 0.9rem;") }}
+                    <a href="{{ url_for('forgot_password') }}" class="small text-decoration-none" style="color: var(--red);">Forgot?</a>
+                </div>
+                {{ form.password(class="form-control " + ("is-invalid" if form.password.errors else ""), placeholder="Enter your password") }}
+                {% for error in form.password.errors %}
+                  <div class="invalid-feedback">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="d-grid mt-4">
+                {{ form.submit(class="btn btn-dut-primary shadow-sm") }}
+            </div>
+        </form>
+
+        <div class="text-center mt-4 pt-3 border-top">
+            <p class="small text-muted mb-1">New to the platform?</p>
+            <a href="{{ url_for('register') }}" class="small fw-bold text-decoration-none" style="color: var(--red);">Create an Account</a>
         </div>
     </div>
 </div>
